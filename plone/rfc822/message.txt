@@ -1,0 +1,364 @@
+Message construction and parsing
+================================
+
+This package contains helper methods to construct an RFC 2822 style message
+from a list of schema fields, and to parse a message and initialise an object
+based on its values.
+
+Before we begin, let's load the default field marshalers and configure
+annotations, which we will use later in this test.
+
+    >>> configuration = """\
+    ... <configure
+    ...      xmlns="http://namespaces.zope.org/zope"
+    ...      i18n_domain="plone.behavior.tests">
+    ...      
+    ...     <include package="zope.component" file="meta.zcml" />
+    ...     <include package="zope.annotation" />
+    ...     
+    ...     <include package="plone.rfc822" />
+    ...     
+    ... </configure>
+    ... """
+
+    >>> from StringIO import StringIO
+    >>> from zope.configuration import xmlconfig
+    >>> xmlconfig.xmlconfig(StringIO(configuration))
+
+The primary field
+-----------------
+
+The message body is assumed to originate from a "primary" field, which is
+indicated via a marker interface. Note that the standard marshaler will still
+be used.
+
+To illustrate the pattern, consider the following schema interface:
+
+    >>> from zope.interface import Interface, alsoProvides
+    >>> from plone.rfc822.interfaces import IPrimaryField
+    >>> from zope import schema
+
+    >>> class ITestContent(Interface):
+    ...
+    ...     title = schema.TextLine(title=u"Title")
+    ...     description = schema.Text(title=u"Description")
+    ...     body = schema.Text(title=u"Body text")
+
+The primary field instance is marked like this:
+
+    >>> alsoProvides(ITestContent['body'], IPrimaryField)
+
+Constructing a message
+----------------------
+
+Let's now say we have an instance providing this interface, which we want to
+marshal to a message.
+
+    >>> from zope.interface import implements
+    >>> class TestContent(object):
+    ...     implements(ITestContent)
+    ...     title = u""
+    ...     description = u""
+    ...     body = u""
+
+    >>> content = TestContent()
+    >>> content.title = u"Test title"
+    >>> content.description = u"""Test description
+    ... with a newline"""
+    >>> content.body = u"<p>Test body</p>"
+
+We could create a message form this instance and schema like this:
+
+    >>> from plone.rfc822 import constructMessageFromSchema
+    >>> msg = constructMessageFromSchema(content, ITestContent)
+
+The output looks like this:
+
+    >>> from plone.rfc822 import renderMessage
+    >>> print renderMessage(msg)
+    title: =?utf-8?q?Test_title?=
+    description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    MIME-Version: 1.0
+    Content-Type: text/plain
+    Content-Length: 16
+    <BLANKLINE>
+    <p>Test body</p>
+
+Notice how the header values are UTF-8 encoded. The body here is of the
+default message type:
+
+    >>> msg.get_default_type()
+    'text/plain'
+
+This is because none of the default field types manage a content type.
+
+If we want to use a different content type, we could set it explicitly:
+
+    >>> msg.set_type('text/html')
+    >>> print renderMessage(msg)
+    title: =?utf-8?q?Test_title?=
+    description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    Content-Length: 16
+    MIME-Version: 1.0
+    Content-Type: text/html
+    <BLANKLINE>
+    <p>Test body</p>
+
+Alternatively, if we know that any ``IText`` field on an object providing
+our ``ITestContent`` interface always stores HTML, could register a custom
+``IFieldMarshaler`` adapter.
+
+Custom marshalers
+-----------------
+
+The default marshaler can be obtained by multi-adapting the content object
+and the field instance to ``IFieldMarshaler``:
+
+    >>> from zope.component import getMultiAdapter
+    >>> from plone.rfc822.interfaces import IFieldMarshaler
+    >>> getMultiAdapter((content, ITestContent['body'],), IFieldMarshaler)
+    <plone.rfc822.defaultfields.UnicodeFieldMarshaler object at ...>
+
+Let's now create our own marshaler by extending this class and overriding
+the ``getContentType()`` method:
+
+    >>> from plone.rfc822.defaultfields import UnicodeFieldMarshaler
+    >>> from zope.schema.interfaces import IText
+    >>> from zope.component import adapts
+
+    >>> class TestBodyMarshaler(UnicodeFieldMarshaler):
+    ...     adapts(ITestContent, IText)
+    ...     
+    ...     def getContentType(self):
+    ...         return 'text/html'
+
+Ordinarily, we'd register this with ZCML. For the purpose of the test, we'll
+register it using the ``zope.component`` API.
+
+    >>> from zope.component import provideAdapter
+    >>> provideAdapter(TestBodyMarshaler)
+
+Hint: If the schema contained multiple text fields, this adapter would apply
+to all of them. To avoid that, we could either mark the field with a custom
+marker interface (like we did with ``IPrimaryField`` above), or have the
+marshaler check the field name.
+
+Let's now try again:
+
+    >>> msg = constructMessageFromSchema(content, ITestContent)
+    >>> print renderMessage(msg)
+    title: =?utf-8?q?Test_title?=
+    description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    MIME-Version: 1.0
+    Content-Type: text/html
+    Content-Length: 16
+    <BLANKLINE>
+    <p>Test body</p>
+
+Consuming a message
+-------------------
+
+A message can be used to initialise an object. The object has to be
+constructed first:
+
+    >>> newContent = TestContent()
+
+We then need to obtain a ``Message`` object. The ``email`` module contains
+helper functions for this purpose.
+
+    >>> messageBody = """\
+    ... title: =?utf-8?q?Test_title?=
+    ... description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    ... MIME-Version: 1.0
+    ... Content-Type: text/html
+    ... Content-Length: 16
+    ...
+    ... <p>Test body</p>"""
+
+    >>> from email import message_from_string
+    >>> msg = message_from_string(messageBody)
+
+The message can now be used to initialise the object according to the given
+schema. This should be the same schema as the one used to construct the
+message.
+
+    >>> from plone.rfc822 import initializeObjectFromSchema
+    >>> initializeObjectFromSchema(newContent, ITestContent, msg)
+
+    >>> newContent.title
+    u'Test title'
+    >>> newContent.description
+    u'Test description\nwith a newline'
+    >>> newContent.body
+    u'<p>Test body</p>'
+
+Handling multiple primary fields and duplicate field names
+----------------------------------------------------------
+
+It is possible that our type could have multiple primary fields or even
+duplicate field names.
+
+For example, consider the following schema interface, intended to be used
+in an annotation adapter:
+
+    >>> class IPersonalDetails(Interface):
+    ...     description = schema.Text(title=u"Personal description")
+    ...     currentAge = schema.Int(title=u"Age", min=0)
+    ...     personalProfile = schema.Text(title=u"Profile")
+    
+    >>> alsoProvides(IPersonalDetails['personalProfile'], IPrimaryField)
+    
+The annotation storage would look like this:
+
+    >>> from persistent import Persistent
+    >>> class PersonalDetailsAnnotation(Persistent):
+    ...     implements(IPersonalDetails)
+    ...     adapts(ITestContent)
+    ...     
+    ...     def __init__(self):
+    ...         self.description = None
+    ...         self.currentAge = None
+    ...         self.personalProfile = None
+
+    >>> from zope.annotation.factory import factory
+    >>> provideAdapter(factory(PersonalDetailsAnnotation))
+
+We should now be able to adapt a content instance to IPersonalDetails,
+provided it is annotatable.
+
+    >>> from zope.annotation.interfaces import IAttributeAnnotatable
+    >>> alsoProvides(content, IAttributeAnnotatable)
+
+    >>> personalDetails = IPersonalDetails(content)
+    >>> personalDetails.description = u"<p>My description</p>"
+    >>> personalDetails.currentAge = 21
+    >>> personalDetails.personalProfile = u"<p>My profile</p>"
+
+The default marshalers will attempt to adapt the context to the schema of
+a given field before getting or setting a value. If we pass multiple schemata
+(or a combined sequence of fields) to the message constructor, it will
+handle both duplicate field names (as duplicate headers) and multiple primary
+fields (as multipart message attachments).
+
+Here are the fields it will see:
+
+    >>> from zope.schema import getFieldsInOrder
+    >>> allFields = getFieldsInOrder(ITestContent) + \
+    ...             getFieldsInOrder(IPersonalDetails)
+
+    >>> [f[0] for f in allFields]
+    ['title', 'description', 'body', 'description', 'currentAge', 'personalProfile']
+
+    >>> [f[0] for f in allFields if IPrimaryField.providedBy(f[1])]
+    ['body', 'personalProfile']
+
+Let's now construct a message. Since we now have two fields called 
+``description``, we will get two headers by that name. Since we have two
+primary fields, we will get a multipart message with two attachments.
+
+    >>> from plone.rfc822 import constructMessageFromSchemata
+    >>> msg = constructMessageFromSchemata(content, (ITestContent, IPersonalDetails,))
+    >>> msgString = renderMessage(msg)
+    >>> print msgString
+    title: =?utf-8?q?Test_title?=
+    description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    description: =?utf-8?b?PHA+TXkgZGVzY3JpcHRpb248L3A+?=
+    currentAge: =?utf-8?q?21?=
+    MIME-Version: 1.0
+    Content-Type: multipart/mixed; boundary="===============...=="
+    <BLANKLINE>
+    --===============...==
+    MIME-Version: 1.0
+    Content-Type: text/html
+    Content-Length: 16
+    <BLANKLINE>
+    <p>Test body</p>
+    --===============...==
+    MIME-Version: 1.0
+    Content-Type: text/html
+    Content-Length: 17
+    <BLANKLINE>
+    <p>My profile</p>
+    --===============...==--
+
+(Note that we've used ellipses here for the doctest to work with the generated
+boundary string).
+
+Notice how both messages have a MIME type of 'text/html'. That is because of
+the custom adapter for ``(ITestContent, IText)`` which we registered earlier.
+
+We can obviously read this message as well. Note that in this case, the order
+of fields passed to ``initializeObject()`` is important, both to determine
+which field gets which ``description`` header, and to match the two
+attachments to the two primary fields:
+
+    >>> newContent = TestContent()
+    >>> alsoProvides(newContent, IAttributeAnnotatable)
+
+    >>> from plone.rfc822 import initializeObjectFromSchemata
+    >>> msg = message_from_string(msgString)
+    >>> initializeObjectFromSchemata(newContent, [ITestContent, IPersonalDetails], msg)
+
+    >>> newContent.title
+    u'Test title'
+    
+    >>> newContent.description
+    u'Test description\nwith a newline'
+
+    >>> newContent.body
+    u'<p>Test body</p>'
+
+    >>> newPersonalDetails = IPersonalDetails(newContent)
+    >>> newPersonalDetails.description
+    u'<p>My description</p>'
+
+    >>> newPersonalDetails.currentAge
+    21
+    
+    >>> newPersonalDetails.personalProfile
+    u'<p>My profile</p>'
+    
+Alternative ways to deal with multiple schemata
+-----------------------------------------------
+
+In the example above, we created a single enveloping message with headers
+corresponding to the fields in both our schemata, and only the primary fields
+separated out into different attached payloads.
+
+An alternative approach would be to separate each schema out into its
+own multipart message. To do that, we would simply use the
+``constructMessage()`` function multiple times.
+
+    >>> mainMessage = constructMessageFromSchema(content, ITestContent)
+    >>> personalDetailsMessage = constructMessageFromSchema(content, IPersonalDetails)
+
+    >>> from email.MIMEMultipart import MIMEMultipart
+    >>> envelope = MIMEMultipart()
+    >>> envelope.attach(mainMessage)
+    >>> envelope.attach(personalDetailsMessage)
+
+    >>> envelopeString = renderMessage(envelope)
+    >>> print envelopeString
+    Content-Type: multipart/mixed; boundary="===============...=="
+    MIME-Version: 1.0
+    <BLANKLINE>
+    --===============...==
+    title: =?utf-8?q?Test_title?=
+    description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    MIME-Version: 1.0
+    Content-Type: text/html
+    Content-Length: 16
+    <BLANKLINE>
+    <p>Test body</p>
+    --===============...==
+    description: =?utf-8?b?PHA+TXkgZGVzY3JpcHRpb248L3A+?=
+    currentAge: =?utf-8?q?21?=
+    MIME-Version: 1.0
+    Content-Type: text/html
+    Content-Length: 17
+    <BLANKLINE>
+    <p>My profile</p>
+    --===============...==--
+
+Which approach works best will depend largely on the intended recipient of
+the message.

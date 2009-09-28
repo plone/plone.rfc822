@@ -1,0 +1,20 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    i18n_domain="plone.rfc822">
+
+    <!-- Default marshalers -->
+    <adapter factory=".defaultfields.UnicodeFieldMarshaler" />
+    
+    <!-- Bool omits to declare that it supports IFromUnicode in zope.schema 3.3 -->
+    <adapter
+        for="* zope.schema.interfaces.IBool"
+        factory=".defaultfields.UnicodeFieldMarshaler"
+        />
+    
+    <adapter factory=".defaultfields.DatetimeMarshaler" />
+    <adapter factory=".defaultfields.DateMarshaler" />
+    <adapter factory=".defaultfields.TimedeltaMarshaler" />
+    <adapter factory=".defaultfields.CollectionMarshaler" />
+
+</configure>

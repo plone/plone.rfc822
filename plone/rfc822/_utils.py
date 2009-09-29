@@ -77,10 +77,6 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
             else:
                 msg.set_type(defaultType)
                 
-            contentLength = marshaler.getContentLength()
-            if contentLength is not None:
-                msg['Content-Length'] = str(contentLength)
-            
             value = marshaler.marshal(charset, primary=False)
             if value is not None:
                 msg.set_payload(value)
@@ -105,11 +101,6 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
                 attach = True
             else:
                 payload.set_type(defaultType)
-            
-            contentLength = marshaler.getContentLength()
-            if contentLength is not None:
-                payload['Content-Length'] = str(contentLength)
-                attach = True
             
             value = marshaler.marshal(charset, primary=True)
             if value is not None:

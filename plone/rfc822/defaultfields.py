@@ -81,12 +81,6 @@ class BaseFieldMarshaler(object):
     def getContentType(self):
         return None
     
-    def getContentLength(self):
-        value = self.marshal()
-        if value is None:
-            return None
-        return len(value)
-    
     # Helper methods
     
     def _query(self, default=None):

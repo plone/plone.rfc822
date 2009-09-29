@@ -161,12 +161,3 @@ class IFieldMarshaler(Interface):
         
         May return None if a content type does not make sense.
         """
-    
-    def getContentLength():
-        """Return the size of the field in bytes. The value should be
-        appropriate for the Content-Length HTTP header. This is mainly used
-        for marshalling the priamry field to the message body.
-        
-        May return None if a length does not make sense.
-        """
-

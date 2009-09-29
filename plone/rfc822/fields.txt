@@ -8,7 +8,7 @@ First, we load the package's configuration:
     >>> configuration = """\
     ... <configure
     ...      xmlns="http://namespaces.zope.org/zope"
-    ...      i18n_domain="plone.behavior.tests">
+    ...      i18n_domain="plone.rfc822.tests">
     ...      
     ...     <include package="zope.component" file="meta.zcml" />
     ...     <include package="zope.annotation" />
@@ -110,8 +110,6 @@ Text
     u'text\xd8'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    6
     >>> marshaler.ascii
     False
 
@@ -125,8 +123,6 @@ TextLine
     u'textline\xd8'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    10
     >>> marshaler.ascii
     False
 
@@ -140,8 +136,6 @@ Password
     u'password\xd8'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    10
     >>> marshaler.ascii
     False
 
@@ -155,8 +149,6 @@ Bytes
     'bytes'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    5
     >>> marshaler.ascii
     True
 
@@ -170,8 +162,6 @@ BytesLine
     'bytesline'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    9
     >>> marshaler.ascii
     True
 
@@ -185,8 +175,6 @@ ASCII
     'ascii'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    5
     >>> marshaler.ascii
     True
 
@@ -200,8 +188,6 @@ ASCIILine
     'asciiline'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    9
     >>> marshaler.ascii
     True
 
@@ -215,8 +201,6 @@ URI
     'http://plone.org'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    16
     >>> marshaler.ascii
     True
 
@@ -230,8 +214,6 @@ Id
     'some.id'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    7
     >>> marshaler.ascii
     True
 
@@ -245,8 +227,6 @@ DottedName
     'dotted.name'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    11
     >>> marshaler.ascii
     True
 
@@ -266,8 +246,6 @@ Bool
     False
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    4
     >>> marshaler.ascii
     True
 
@@ -281,8 +259,6 @@ Int
     -10
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    3
     >>> marshaler.ascii
     True
 
@@ -296,8 +272,6 @@ Float
     0.25
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    3
     >>> marshaler.ascii
     True
 
@@ -311,8 +285,6 @@ Choice
     u'one'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    3
     >>> marshaler.ascii
     False
     
@@ -323,8 +295,6 @@ Choice
     u'three'
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    3
     >>> marshaler.ascii
     False
 
@@ -338,8 +308,6 @@ Datetime
     datetime.datetime(2009, 1, 2, 15, 10, 5, 1, tzinfo=tzoffset(None, 3600))
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    32
     >>> marshaler.ascii
     True
 
@@ -353,8 +321,6 @@ Date
     datetime.date(2008, 2, 3)
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    10
     >>> marshaler.ascii
     True
 
@@ -368,8 +334,6 @@ Timedelta
     datetime.timedelta(3, 4, 5)
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    5
     >>> marshaler.ascii
     True
 
@@ -383,8 +347,6 @@ Tuple
     (u'one\xd8', u'two')
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    10
     >>> marshaler.ascii # depends on value_type
     False
 
@@ -398,8 +360,6 @@ List
     ['three', 'four']
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    11
     >>> marshaler.ascii # depends on value_type
     True
 
@@ -413,8 +373,6 @@ Set
     True
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    11
     >>> marshaler.ascii # depends on value_type
     True
 
@@ -428,7 +386,5 @@ Frozenset
     True
     >>> marshaler.getContentType() is None
     True
-    >>> marshaler.getContentLength()
-    12
     >>> marshaler.ascii # depends on value_type
     True

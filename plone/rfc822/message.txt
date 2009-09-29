@@ -11,7 +11,7 @@ annotations, which we will use later in this test.
     >>> configuration = """\
     ... <configure
     ...      xmlns="http://namespaces.zope.org/zope"
-    ...      i18n_domain="plone.behavior.tests">
+    ...      i18n_domain="plone.rfc822.tests">
     ...      
     ...     <include package="zope.component" file="meta.zcml" />
     ...     <include package="zope.annotation" />
@@ -80,7 +80,6 @@ The output looks like this:
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     MIME-Version: 1.0
     Content-Type: text/plain
-    Content-Length: 16
     <BLANKLINE>
     <p>Test body</p>
 
@@ -98,7 +97,6 @@ If we want to use a different content type, we could set it explicitly:
     >>> print renderMessage(msg)
     title: =?utf-8?q?Test_title?=
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
-    Content-Length: 16
     MIME-Version: 1.0
     Content-Type: text/html
     <BLANKLINE>
@@ -151,7 +149,6 @@ Let's now try again:
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     MIME-Version: 1.0
     Content-Type: text/html
-    Content-Length: 16
     <BLANKLINE>
     <p>Test body</p>
 
@@ -171,7 +168,6 @@ helper functions for this purpose.
     ... description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     ... MIME-Version: 1.0
     ... Content-Type: text/html
-    ... Content-Length: 16
     ...
     ... <p>Test body</p>"""
 
@@ -270,13 +266,11 @@ primary fields, we will get a multipart message with two attachments.
     --===============...==
     MIME-Version: 1.0
     Content-Type: text/html
-    Content-Length: 16
     <BLANKLINE>
     <p>Test body</p>
     --===============...==
     MIME-Version: 1.0
     Content-Type: text/html
-    Content-Length: 17
     <BLANKLINE>
     <p>My profile</p>
     --===============...==--
@@ -347,7 +341,6 @@ own multipart message. To do that, we would simply use the
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     MIME-Version: 1.0
     Content-Type: text/html
-    Content-Length: 16
     <BLANKLINE>
     <p>Test body</p>
     --===============...==
@@ -355,7 +348,6 @@ own multipart message. To do that, we would simply use the
     currentAge: 21
     MIME-Version: 1.0
     Content-Type: text/html
-    Content-Length: 17
     <BLANKLINE>
     <p>My profile</p>
     --===============...==--

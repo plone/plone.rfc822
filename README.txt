@@ -100,12 +100,11 @@ The message format used adheres to the following rules:
   the header is ignored.
 * If there is a single primary field, the message has a string payload, which
   is the marshalled value of the primary field. In this case, the
-  ``Content-Type`` and ``Content-Length`` headers of the message will be
-  obtained from the primary field's marshaler.
+  ``Content-Type`` header of the message will be obtained from the primary
+  field's marshaler.
 * If there are multiple primary fields, each is encoded into its own message,
-  each with its own ``Content-Type`` and ``Content-Length`` (if available).
-  The outer message will have a content type of ``multipart/mixed`` and
-  headers for other fields.
+  each with its own ``Content-Type`` header. The outer message will have a
+  content type of ``multipart/mixed`` and headers for other fields.
 * A ``ValueError`` error is raised if a message is being parsed which has
   more or fewer parts than there are primary fields.
 * Duplicate field names are allowed, and will be encoded as duplicate headers.

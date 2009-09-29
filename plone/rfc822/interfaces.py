@@ -114,13 +114,16 @@ class IFieldMarshaler(Interface):
         The returned value must be a string.
         """
     
-    def demarshal(value, charset='utf-8', contentType=None, primary=False):
+    def demarshal(value, message=None, charset='utf-8', contentType=None, primary=False):
         """Update the value of the adapted field on the adapted context.
         
         Note: It may be necessary to adapt the context to the field's
               interface (``field.interface``) before getting the value.
         
         ``value`` is the string value from the message.
+        
+        ``message`` is the message object itself. This may be None if the
+        marshaler is being used in isolation.
         
         ``charset`` is the default charset for the message. For string
         values, this is most likely the encoding of the string. For binary
@@ -145,7 +148,7 @@ class IFieldMarshaler(Interface):
         Return None if the value cannot be encoded.
         """
     
-    def decode(value, charset='utf-8', contentType=None, primary=False):
+    def decode(value, message=None, charset='utf-8', contentType=None, primary=False):
         """Like demarshal, but return the value instead of updating the field.
         
         This is only used for collection fields and other situations where
@@ -160,4 +163,10 @@ class IFieldMarshaler(Interface):
         the primary field to the message body.
         
         May return None if a content type does not make sense.
+        """
+    
+    def postProcessMessage(message):
+        """This is a chance to perform any post-processing of the message.
+        
+        It is only called for primary fields.
         """

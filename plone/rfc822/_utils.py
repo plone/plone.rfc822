@@ -80,6 +80,8 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
             value = marshaler.marshal(charset, primary=False)
             if value is not None:
                 msg.set_payload(value)
+                
+            marshaler.postProcessMessage(msg)
     
     # Otherwise, we return a multipart message
     
@@ -108,6 +110,7 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
                 attach = True
             
             if attach:
+                marshaler.postProcessMessage(payload)
                 msg.attach(payload)
 
     return msg
@@ -177,7 +180,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
             headerValue = headerValue.replace('\r\n', os.linesep)
         
         try:
-            marshaler.demarshal(headerValue, charset=headerCharset, contentType=contentType, primary=False)
+            marshaler.demarshal(headerValue, message=message, charset=headerCharset, contentType=contentType, primary=False)
         except ValueError, e:
             # interface allows demarshal() to raise ValueError to indicate marshalling failed
             LOG.debug("Demarshalling of %s for %s failed: %s" % (name, repr(context), str(e)))
@@ -199,7 +202,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                 LOG.debug("No marshaler found for primary field %s of %s" % (name, repr(context),))
             else:        
                 try:
-                    marshaler.demarshal(payload, charset=charset, contentType=contentType, primary=False)
+                    marshaler.demarshal(payload, message=message, charset=charset, contentType=contentType, primary=False)
                 except ValueError, e:
                     # interface allows demarshal() to raise ValueError to indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" % (name, repr(context), str(e)))
@@ -226,7 +229,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                     continue
                 
                 try:
-                    marshaler.demarshal(msg.get_payload(), charset=charset, contentType=contentType, primary=False)
+                    marshaler.demarshal(msg.get_payload(), message=msg, charset=charset, contentType=contentType, primary=False)
                 except ValueError, e:
                     # interface allows demarshal() to raise ValueError to indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" % (name, repr(context), str(e)))

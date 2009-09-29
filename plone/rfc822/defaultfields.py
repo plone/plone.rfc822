@@ -69,17 +69,20 @@ class BaseFieldMarshaler(object):
             return None
         return self.encode(value, charset, primary)
     
-    def demarshal(self, value, charset='utf-8', contentType=None, primary=False):
-        self._set(self.decode(value, charset, contentType, primary))
+    def demarshal(self, value, message=None, charset='utf-8', contentType=None, primary=False):
+        self._set(self.decode(value, message, charset, contentType, primary))
     
     def encode(self, value, charset='utf-8', primary=False):
         return None
     
-    def decode(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, message=None, charset='utf-8', contentType=None, primary=False):
         raise ValueError("Demarshalling not implemented for %s" % repr(self.field))
     
     def getContentType(self):
         return None
+    
+    def postProcessMessage(self, message):
+        pass
     
     # Helper methods
     
@@ -103,7 +106,7 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
             return None
         return unicode(value).encode(charset)
     
-    def decode(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, message=None, charset='utf-8', contentType=None, primary=False):
         unicodeValue = value.decode(charset)
         try:
             return self.field.fromUnicode(unicodeValue)
@@ -129,7 +132,7 @@ class BytesFieldMarshaler(BaseFieldMarshaler):
     def encode(self, value, charset='utf-8', primary=False):
         return value
     
-    def decode(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, message=None, charset='utf-8', contentType=None, primary=False):
         return value
 
 class DatetimeMarshaler(BaseFieldMarshaler):
@@ -145,7 +148,7 @@ class DatetimeMarshaler(BaseFieldMarshaler):
             return None
         return value.isoformat()
     
-    def decode(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, message=None, charset='utf-8', contentType=None, primary=False):
         unicodeValue = value.decode(charset)
         try:
             return dateutil.parser.parse(unicodeValue)
@@ -169,7 +172,7 @@ class DateMarshaler(BaseFieldMarshaler):
             return None
         return value.isoformat()
     
-    def decode(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, message=None, charset='utf-8', contentType=None, primary=False):
         unicodeValue = value.decode(charset)
         try:
             return dateutil.parser.parse(unicodeValue).date()
@@ -193,7 +196,7 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
             return None
         return "%d:%d:%d" % (value.days, value.seconds, value.microseconds)
     
-    def decode(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, message=None, charset='utf-8', contentType=None, primary=False):
         unicodeValue = value.decode(charset)
         try:
             days, seconds, microseconds = [int(v) for v in value.split(":")]
@@ -231,7 +234,7 @@ class CollectionMarshaler(BaseFieldMarshaler):
         
         return '||'.join(value_lines)
     
-    def decode(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, message=None, charset='utf-8', contentType=None, primary=False):
         valueTypeMarshaler = queryMultiAdapter((self.context, self.field.value_type,), IFieldMarshaler)
         if valueTypeMarshaler is None:
             raise ValueError("Cannot demarshal value type %s" % repr(self.field.value_type))
@@ -239,7 +242,7 @@ class CollectionMarshaler(BaseFieldMarshaler):
         listValue = []
         
         for line in value.split('||'):
-            listValue.append(valueTypeMarshaler.decode(line, charset, contentType, primary))
+            listValue.append(valueTypeMarshaler.decode(line, message, charset, contentType, primary))
             
         sequenceType = self.field._type
         if isinstance(sequenceType, (list, tuple,)):

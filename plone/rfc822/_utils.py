@@ -216,7 +216,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
             for idx, msg in enumerate(payload):
                 name, field = primary[idx]
                 
-                contentType = message.get_content_type()
+                contentType = msg.get_content_type()
     
                 charset = message.get_charset()
                 if charset is not None:

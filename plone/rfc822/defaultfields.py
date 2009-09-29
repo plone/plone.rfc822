@@ -30,27 +30,30 @@ Unsupported by default:
 * Dict - stores a dict
 """
 
-import time
 import datetime
+import dateutil.parser
 
 from zope.component import queryMultiAdapter
-
-from email.Utils import parsedate_tz, mktime_tz, formatdate
 
 from zope.interface import implements, Interface
 from zope.component import adapts
 
 from zope.schema.interfaces import IFromUnicode
+from zope.schema.interfaces import IBytes
 from zope.schema.interfaces import IDatetime, IDate, ITimedelta
 from zope.schema.interfaces import ICollection
 
 from plone.rfc822.interfaces import IFieldMarshaler
+
+_marker = object()
 
 class BasefieldMarshaler(object):
     """Base class for field marshalers
     """
     
     implements(IFieldMarshaler)
+    
+    ascii = False
     
     def __init__(self, context, field):
         self.context = context
@@ -61,10 +64,16 @@ class BasefieldMarshaler(object):
             self.instance = field.interface(context, context)
     
     def marshal(self, charset='utf-8', primary=False):
-        return None
+        value = self._query(_marker)
+        if value is _marker:
+            return None
+        return self.encode(value, charset, primary)
     
     def demarshal(self, value, charset='utf-8', contentType=None, primary=False):
         self._set(self.extract(value, charset, contentType, primary))
+    
+    def encode(self, value, charset='utf-8', primary=False):
+        return None
     
     def extract(self, value, charset='utf-8', contentType=None, primary=False):
         raise ValueError("Demarshalling not implemented for %s" % repr(self.field))
@@ -95,8 +104,7 @@ class UnicodeFieldMarshaler(BasefieldMarshaler):
     
     adapts(Interface, IFromUnicode)
     
-    def marshal(self, charset='utf-8', primary=False):
-        value = self._query()
+    def encode(self, value, charset='utf-8', primary=False):
         if value is None:
             return None
         return unicode(value).encode(charset)
@@ -106,7 +114,29 @@ class UnicodeFieldMarshaler(BasefieldMarshaler):
         try:
             return self.field.fromUnicode(unicodeValue)
         except Exception, e:
-            raise ValueError(e)        
+            raise ValueError(e)
+
+class ASCIISafeFieldMarshaler(UnicodeFieldMarshaler):
+    """Default marshaler for fields that are ASCII safe, but still support
+    IFromUnicode. This includes Int, Float and Bool.
+    """
+    
+    ascii = True
+    
+class BytesFieldMarshaler(BasefieldMarshaler):
+    """Default marshaler for IBytes fields and children. These store str
+    objects, so we will attempt to encode them directly.
+    """
+    
+    adapts(Interface, IBytes)
+    
+    ascii = True
+    
+    def encode(self, value, charset='utf-8', primary=False):
+        return value
+    
+    def extract(self, value, charset='utf-8', contentType=None, primary=False):
+        return value
 
 class DatetimeMarshaler(BasefieldMarshaler):
     """Marshaler for Python datetime values
@@ -114,40 +144,57 @@ class DatetimeMarshaler(BasefieldMarshaler):
     
     adapts(Interface, IDatetime)
     
-    def marshal(self, charset='utf-8', primary=False):
-        value = self._query()
+    ascii = True
+    
+    def encode(self, value, charset='utf-8', primary=False):
         if value is None:
             return None
-        timetuple = value.timetuple()
-        timestamp = time.mktime(timetuple)
-        return formatdate(timestamp)
+        return value.isoformat()
     
     def extract(self, value, charset='utf-8', contentType=None, primary=False):
         unicodeValue = value.decode(charset)
-        timetuple = parsedate_tz(value)
-        timestamp = mktime_tz(timetuple)
-        return datetime.datetime.fromtimestamp(timestamp)
+        try:
+            return dateutil.parser.parse(unicodeValue)
+        except Exception, e:
+            raise ValueError(e)
 
-class DateMarshaler(DatetimeMarshaler):
-    """Marshaler for Python date values
+class DateMarshaler(BasefieldMarshaler):
+    """Marshaler for Python date values.
+    
+    Note: we don't use the date formatting support in the 'email' module as
+    this does not seem to be capable of round-tripping values with time zone
+    information.
     """
     
     adapts(Interface, IDate)
-
+    
+    ascii = True
+    
+    def encode(self, value, charset='utf-8', primary=False):
+        if value is None:
+            return None
+        return value.isoformat()
+    
     def extract(self, value, charset='utf-8', contentType=None, primary=False):
         unicodeValue = value.decode(charset)
-        timetuple = parsedate_tz(value)
-        timestamp = mktime_tz(timetuple)
-        return datetime.date.fromtimestamp(timestamp)
+        try:
+            return dateutil.parser.parse(unicodeValue).date()
+        except Exception, e:
+            raise ValueError(e)
 
 class TimedeltaMarshaler(BasefieldMarshaler):
     """Marshaler for Python timedelta values
+    
+    Note: we don't use the date formatting support in the 'email' module as
+    this does not seem to be capable of round-tripping values with time zone
+    information.
     """
     
     adapts(Interface, ITimedelta)
     
-    def marshal(self, charset='utf-8', primary=False):
-        value = self._query()
+    ascii = True
+    
+    def encode(self, value, charset='utf-8', primary=False):
         if value is None:
             return None
         return "%d:%d:%d" % (value.days, value.seconds, value.microseconds)
@@ -166,8 +213,14 @@ class CollectionMarshaler(BasefieldMarshaler):
     
     adapts(Interface, ICollection)
 
-    def marshal(self, charset='utf-8', primary=False):
-        value = self._query()
+    @property
+    def ascii(self):
+        valueTypeMarshaler = queryMultiAdapter((self.context, self.field.value_type,), IFieldMarshaler)
+        if valueTypeMarshaler is None:
+            return False
+        return valueTypeMarshaler.ascii
+
+    def encode(self, value, charset='utf-8', primary=False):
         if value is None:
             return None
         
@@ -177,11 +230,12 @@ class CollectionMarshaler(BasefieldMarshaler):
         
         value_lines = []
         for item in value:
-            marshaledValue = valueTypeMarshaler.marshal(charset=charset, primary=primary)
+            marshaledValue = valueTypeMarshaler.encode(item, charset=charset, primary=primary)
             if marshaledValue is None:
                 marshaledValue = ''
             value_lines.append(marshaledValue)
-        return '\n'.join(value_lines)
+        
+        return '||'.join(value_lines)
     
     def extract(self, value, charset='utf-8', contentType=None, primary=False):
         valueTypeMarshaler = queryMultiAdapter((self.context, self.field.value_type,), IFieldMarshaler)
@@ -190,10 +244,11 @@ class CollectionMarshaler(BasefieldMarshaler):
         
         listValue = []
         
-        for line in value.split('\n'):
+        for line in value.split('||'):
             listValue.append(valueTypeMarshaler.extract(line, charset, contentType, primary))
             
-        sequenceType = self._type
+        sequenceType = self.field._type
         if isinstance(sequenceType, (list, tuple,)):
             sequenceType = sequenceType[-1]
+        
         return sequenceType(listValue)

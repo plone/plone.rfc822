@@ -1,3 +1,10 @@
+"""Implementation of IMessageAPI methods.
+
+import these from plone.rfc822 directly, not from this module.
+
+See interfaces.py for details.
+"""
+
 import os
 import logging
 from cStringIO import StringIO
@@ -14,8 +21,6 @@ from plone.rfc822.interfaces import IFieldMarshaler
 from plone.rfc822.interfaces import IPrimaryField
 
 LOG = logging.getLogger('plone.rfc822')
-
-# see interfaces.py for details about these methods
 
 def constructMessageFromSchema(context, schema, charset='utf-8', defaultType='text/plain'):
     return constructMessage(context, getFieldsInOrder(schema), charset, defaultType)
@@ -51,7 +56,10 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
         if not isinstance(value, str):
             raise ValueError("Marshaler for field %s did not return a string" % name)
         
-        msg[name] = Header(value, charset)
+        if marshaler.ascii:
+            msg[name] = value
+        else:
+            msg[name] = Header(value, charset)
     
     # Then deal with the primary field
     
@@ -208,8 +216,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
     # Multiple payloads
     elif isinstance(payload, (list, tuple,)):
         if len(payload) != len(primary):
-            LOG.error("Got %d payloads for message, but %s primary fields found for %s" % 
-                        (len(payload), len(primary), repr(context),))
+            raise ValueError("Got %d payloads for message, but %s primary fields found for %s" %  (len(payload), len(primary), repr(context),))
         else:
             for idx, msg in enumerate(payload):
                 name, field = primary[idx]

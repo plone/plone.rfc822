@@ -1,4 +1,5 @@
 from zope.interface import Interface
+from zope import schema
 
 class IPrimaryField(Interface):
     """Marker interface for the primary field in a schema
@@ -88,6 +89,15 @@ class IFieldMarshaler(Interface):
     elsewhere. 
     """
     
+    ascii = schema.Bool(
+            title=u"ASCII only",
+            description=u"Set this to true if this marshaler is guaranteed "
+                         "to return ASCII characters only. This will allow "
+                         "a header to be rendered without an encoding wrapper",
+            default=False,
+            required=True,
+        )
+    
     def marshal(charset='utf-8', primary=False):
         """Return the value of the adapted field on the adapted context.
         
@@ -123,6 +133,16 @@ class IFieldMarshaler(Interface):
         None if this is not available. This is mainly used for primary fields.
         
         Raise ``ValueError`` if the demarshalling cannot be completed.
+        """
+    
+    def encode(value, charset='utf-8', primary=False):
+        """Like marshal(), but acts on the passed-in ``value`` instead of
+        reading it from the field.
+        
+        This is only used for collection fields and other situations where
+        the value is not read from an instance.
+        
+        Return None if the value cannot be encoded.
         """
     
     def extract(value, charset='utf-8', contentType=None, primary=False):

@@ -95,7 +95,7 @@ The message format used adheres to the following rules:
 * All non-primary fields are represented as headers. The header name is taken
   from the field name, and the value is an encoded string as returned by the
   ``marshal()`` method of the appropriate ``IFieldMarshal`` multi-adapter.
-* If no ``IFieldMarshal`` adapter can be found, the header is ignored.
+* If no ``IFieldMarshaler`` adapter can be found, the header is ignored.
 * Similarly, if no fields are found for a given header when parsing a message,
   the header is ignored.
 * If there is a single primary field, the message has a string payload, which
@@ -104,7 +104,8 @@ The message format used adheres to the following rules:
   obtained from the primary field's marshaler.
 * If there are multiple primary fields, each is encoded into its own message,
   each with its own ``Content-Type`` and ``Content-Length`` (if available).
-  The outer message will have a content type of ``multipart/mixed``
+  The outer message will have a content type of ``multipart/mixed`` and
+  headers for other fields.
 * A ``ValueError`` error is raised if a message is being parsed which has
   more or fewer parts than there are primary fields.
 * Duplicate field names are allowed, and will be encoded as duplicate headers.
@@ -116,3 +117,4 @@ The message format used adheres to the following rules:
   If a third 'foo' header appears, it will be ignored.
 * Since message headers are always lowercase, field names will be matched
   case-insensitively when parsing a message.
+

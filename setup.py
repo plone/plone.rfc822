@@ -7,7 +7,8 @@ setup(name='plone.rfc822',
       version=version,
       description="RFC822 marshalling for zope.schema fields",
       long_description=open("README.txt").read() + "\n" +
-                       open(os.path.join("docs", "HISTORY.txt")).read(),
+                       open(os.path.join("docs", "HISTORY.txt")).read() +
+                       open(os.path.join("plone", "rfc822", "message.txt")).read(),
       # Get more strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
         "Framework :: Plone",
@@ -25,16 +26,12 @@ setup(name='plone.rfc822',
       zip_safe=False,
       install_requires=[
           'setuptools',
-          # -*- Extra requirements: -*-
+          'zope.schema',
+          'zope.component',
+          'zope.interface',
+          'pytz',
+          'python-dateutil',
       ],
       entry_points="""
-      # -*- Entry points: -*-
-
-      [distutils.setup_keywords]
-      paster_plugins = setuptools.dist:assert_string_list
-
-      [egg_info.writers]
-      paster_plugins.txt = setuptools.command.egg_info:write_arg
       """,
-      paster_plugins = ["ZopeSkel"],
       )

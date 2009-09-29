@@ -263,7 +263,7 @@ primary fields, we will get a multipart message with two attachments.
     title: =?utf-8?q?Test_title?=
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     description: =?utf-8?b?PHA+TXkgZGVzY3JpcHRpb248L3A+?=
-    currentAge: =?utf-8?q?21?=
+    currentAge: 21
     MIME-Version: 1.0
     Content-Type: multipart/mixed; boundary="===============...=="
     <BLANKLINE>
@@ -352,7 +352,7 @@ own multipart message. To do that, we would simply use the
     <p>Test body</p>
     --===============...==
     description: =?utf-8?b?PHA+TXkgZGVzY3JpcHRpb248L3A+?=
-    currentAge: =?utf-8?q?21?=
+    currentAge: 21
     MIME-Version: 1.0
     Content-Type: text/html
     Content-Length: 17

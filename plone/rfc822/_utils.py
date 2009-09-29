@@ -200,9 +200,10 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
             marshaler = queryMultiAdapter((context, field,), IFieldMarshaler)
             if marshaler is None:
                 LOG.debug("No marshaler found for primary field %s of %s" % (name, repr(context),))
-            else:        
+            else:
+                payloadValue = message.get_payload(decode=True)
                 try:
-                    marshaler.demarshal(payload, message=message, charset=charset, contentType=contentType, primary=True)
+                    marshaler.demarshal(payloadValue, message=message, charset=charset, contentType=contentType, primary=True)
                 except ValueError, e:
                     # interface allows demarshal() to raise ValueError to indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" % (name, repr(context), str(e)))
@@ -228,8 +229,9 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                     LOG.debug("No marshaler found for primary field %s of %s" % (name, repr(context),))
                     continue
                 
+                payloadValue = msg.get_payload(decode=True)
                 try:
-                    marshaler.demarshal(msg.get_payload(), message=msg, charset=charset, contentType=contentType, primary=True)
+                    marshaler.demarshal(payloadValue, message=msg, charset=charset, contentType=contentType, primary=True)
                 except ValueError, e:
                     # interface allows demarshal() to raise ValueError to indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" % (name, repr(context), str(e)))

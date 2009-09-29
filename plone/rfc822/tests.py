@@ -15,4 +15,9 @@ def test_suite():
                 tearDown=zope.component.testing.tearDown(),
                 optionflags=doctest.ELLIPSIS
             ),
+            doctest.DocFileSuite(
+                'supermodel.txt',
+                tearDown=zope.component.testing.tearDown(),
+                optionflags=doctest.ELLIPSIS
+            ),
         ))

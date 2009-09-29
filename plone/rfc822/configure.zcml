@@ -1,6 +1,7 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
     xmlns:five="http://namespaces.zope.org/five"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
     i18n_domain="plone.rfc822">
     
     <!-- Default marshalers -->
@@ -37,5 +38,11 @@
     <adapter factory=".defaultfields.DateMarshaler" />
     <adapter factory=".defaultfields.TimedeltaMarshaler" />
     <adapter factory=".defaultfields.CollectionMarshaler" />
+    
+    <!-- Configure plone.supermodel handler if available -->
+    <utility zcml:condition="installed plone.supermodel"
+        factory=".supermodel.PrimaryFieldMetadataHandler"
+        name="plone.rfc822.marshal"
+        />
 
 </configure>

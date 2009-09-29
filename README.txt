@@ -118,3 +118,23 @@ The message format used adheres to the following rules:
 * Since message headers are always lowercase, field names will be matched
   case-insensitively when parsing a message.
 
+Supermodel handler
+------------------
+
+If ``plone.supermodel`` is installed, this package will register a namespace
+handler for the ``marshal`` namespace, with the URI
+``http://namespaces.plone.org/supermodel/marshal``. This can be used to mark
+a field as the primary field::
+
+    <model xmlns="http://namespaces.plone.org/supermodel/schema"
+           xmlns:marshal="http://namespaces.plone.org/supermodel/marshal">
+        <schema>
+            <field type="zope.schema.Text" name="test" marshal:primary="true">
+                <title>Test field</title>
+            </field>
+        </schema>
+    </model>
+
+``plone.supermodel`` may be installed as a dependency using the extra
+``[supermodel]``, but this is probably only useful for running the tests. If
+the package is not installed, the handler will not be ignored.

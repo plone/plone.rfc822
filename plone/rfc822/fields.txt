@@ -27,8 +27,8 @@ we support.
 
     >>> from zope.interface import Interface
     >>> from zope import schema
-    >>> from pytz import timezone
-    >>> tz = timezone('Europe/Oslo')
+    >>> from dateutil.tz import tzoffset
+    >>> tz = tzoffset('Europe/Oslo', 3600)
 
     >>> class ITestContent(Interface):
     ...     _text = schema.Text()

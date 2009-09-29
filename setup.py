@@ -24,12 +24,14 @@ setup(name='plone.rfc822',
       namespace_packages=['plone'],
       include_package_data=True,
       zip_safe=False,
+      extras_require={
+        'supermodel': ['plone.supermodel'],
+      },
       install_requires=[
           'setuptools',
           'zope.schema',
           'zope.component',
           'zope.interface',
-          'pytz',
           'python-dateutil',
       ],
       entry_points="""

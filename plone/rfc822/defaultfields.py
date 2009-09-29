@@ -47,7 +47,7 @@ from plone.rfc822.interfaces import IFieldMarshaler
 
 _marker = object()
 
-class BasefieldMarshaler(object):
+class BaseFieldMarshaler(object):
     """Base class for field marshalers
     """
     
@@ -98,7 +98,7 @@ class BasefieldMarshaler(object):
         except TypeError, e:
             raise ValueError(e)
 
-class UnicodeFieldMarshaler(BasefieldMarshaler):
+class UnicodeFieldMarshaler(BaseFieldMarshaler):
     """Default marshaler for fields that support IFromUnicode
     """
     
@@ -123,7 +123,7 @@ class ASCIISafeFieldMarshaler(UnicodeFieldMarshaler):
     
     ascii = True
     
-class BytesFieldMarshaler(BasefieldMarshaler):
+class BytesFieldMarshaler(BaseFieldMarshaler):
     """Default marshaler for IBytes fields and children. These store str
     objects, so we will attempt to encode them directly.
     """
@@ -138,7 +138,7 @@ class BytesFieldMarshaler(BasefieldMarshaler):
     def decode(self, value, charset='utf-8', contentType=None, primary=False):
         return value
 
-class DatetimeMarshaler(BasefieldMarshaler):
+class DatetimeMarshaler(BaseFieldMarshaler):
     """Marshaler for Python datetime values
     """
     
@@ -158,7 +158,7 @@ class DatetimeMarshaler(BasefieldMarshaler):
         except Exception, e:
             raise ValueError(e)
 
-class DateMarshaler(BasefieldMarshaler):
+class DateMarshaler(BaseFieldMarshaler):
     """Marshaler for Python date values.
     
     Note: we don't use the date formatting support in the 'email' module as
@@ -182,7 +182,7 @@ class DateMarshaler(BasefieldMarshaler):
         except Exception, e:
             raise ValueError(e)
 
-class TimedeltaMarshaler(BasefieldMarshaler):
+class TimedeltaMarshaler(BaseFieldMarshaler):
     """Marshaler for Python timedelta values
     
     Note: we don't use the date formatting support in the 'email' module as
@@ -207,7 +207,7 @@ class TimedeltaMarshaler(BasefieldMarshaler):
         except Exception, e:
             raise ValueError(e)
 
-class CollectionMarshaler(BasefieldMarshaler):
+class CollectionMarshaler(BaseFieldMarshaler):
     """Marshaler for collection values
     """
     

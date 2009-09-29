@@ -77,7 +77,7 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
             else:
                 msg.set_type(defaultType)
                 
-            value = marshaler.marshal(charset, primary=False)
+            value = marshaler.marshal(charset, primary=True)
             if value is not None:
                 msg.set_payload(value)
                 
@@ -202,7 +202,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                 LOG.debug("No marshaler found for primary field %s of %s" % (name, repr(context),))
             else:        
                 try:
-                    marshaler.demarshal(payload, message=message, charset=charset, contentType=contentType, primary=False)
+                    marshaler.demarshal(payload, message=message, charset=charset, contentType=contentType, primary=True)
                 except ValueError, e:
                     # interface allows demarshal() to raise ValueError to indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" % (name, repr(context), str(e)))
@@ -229,7 +229,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                     continue
                 
                 try:
-                    marshaler.demarshal(msg.get_payload(), message=msg, charset=charset, contentType=contentType, primary=False)
+                    marshaler.demarshal(msg.get_payload(), message=msg, charset=charset, contentType=contentType, primary=True)
                 except ValueError, e:
                     # interface allows demarshal() to raise ValueError to indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" % (name, repr(context), str(e)))

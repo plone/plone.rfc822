@@ -145,7 +145,7 @@ class IFieldMarshaler(Interface):
         Return None if the value cannot be encoded.
         """
     
-    def extract(value, charset='utf-8', contentType=None, primary=False):
+    def decode(value, charset='utf-8', contentType=None, primary=False):
         """Like demarshal, but return the value instead of updating the field.
         
         This is only used for collection fields and other situations where

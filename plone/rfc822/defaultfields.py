@@ -70,12 +70,12 @@ class BasefieldMarshaler(object):
         return self.encode(value, charset, primary)
     
     def demarshal(self, value, charset='utf-8', contentType=None, primary=False):
-        self._set(self.extract(value, charset, contentType, primary))
+        self._set(self.decode(value, charset, contentType, primary))
     
     def encode(self, value, charset='utf-8', primary=False):
         return None
     
-    def extract(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, charset='utf-8', contentType=None, primary=False):
         raise ValueError("Demarshalling not implemented for %s" % repr(self.field))
     
     def getContentType(self):
@@ -109,7 +109,7 @@ class UnicodeFieldMarshaler(BasefieldMarshaler):
             return None
         return unicode(value).encode(charset)
     
-    def extract(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, charset='utf-8', contentType=None, primary=False):
         unicodeValue = value.decode(charset)
         try:
             return self.field.fromUnicode(unicodeValue)
@@ -135,7 +135,7 @@ class BytesFieldMarshaler(BasefieldMarshaler):
     def encode(self, value, charset='utf-8', primary=False):
         return value
     
-    def extract(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, charset='utf-8', contentType=None, primary=False):
         return value
 
 class DatetimeMarshaler(BasefieldMarshaler):
@@ -151,7 +151,7 @@ class DatetimeMarshaler(BasefieldMarshaler):
             return None
         return value.isoformat()
     
-    def extract(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, charset='utf-8', contentType=None, primary=False):
         unicodeValue = value.decode(charset)
         try:
             return dateutil.parser.parse(unicodeValue)
@@ -175,7 +175,7 @@ class DateMarshaler(BasefieldMarshaler):
             return None
         return value.isoformat()
     
-    def extract(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, charset='utf-8', contentType=None, primary=False):
         unicodeValue = value.decode(charset)
         try:
             return dateutil.parser.parse(unicodeValue).date()
@@ -199,7 +199,7 @@ class TimedeltaMarshaler(BasefieldMarshaler):
             return None
         return "%d:%d:%d" % (value.days, value.seconds, value.microseconds)
     
-    def extract(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, charset='utf-8', contentType=None, primary=False):
         unicodeValue = value.decode(charset)
         try:
             days, seconds, microseconds = [int(v) for v in value.split(":")]
@@ -237,7 +237,7 @@ class CollectionMarshaler(BasefieldMarshaler):
         
         return '||'.join(value_lines)
     
-    def extract(self, value, charset='utf-8', contentType=None, primary=False):
+    def decode(self, value, charset='utf-8', contentType=None, primary=False):
         valueTypeMarshaler = queryMultiAdapter((self.context, self.field.value_type,), IFieldMarshaler)
         if valueTypeMarshaler is None:
             raise ValueError("Cannot demarshal value type %s" % repr(self.field.value_type))
@@ -245,7 +245,7 @@ class CollectionMarshaler(BasefieldMarshaler):
         listValue = []
         
         for line in value.split('||'):
-            listValue.append(valueTypeMarshaler.extract(line, charset, contentType, primary))
+            listValue.append(valueTypeMarshaler.decode(line, charset, contentType, primary))
             
         sequenceType = self.field._type
         if isinstance(sequenceType, (list, tuple,)):

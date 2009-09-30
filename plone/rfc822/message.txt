@@ -3,7 +3,7 @@ Message construction and parsing
 
 This package contains helper methods to construct an RFC 2822 style message
 from a list of schema fields, and to parse a message and initialise an object
-based on its values.
+based on its headers and body payload.
 
 Before we begin, let's load the default field marshalers and configure
 annotations, which we will use later in this test.
@@ -29,8 +29,7 @@ The primary field
 -----------------
 
 The message body is assumed to originate from a "primary" field, which is
-indicated via a marker interface. Note that the standard marshaler will still
-be used.
+indicated via a marker interface.
 
 To illustrate the pattern, consider the following schema interface:
 
@@ -83,8 +82,8 @@ The output looks like this:
     <BLANKLINE>
     <p>Test body</p>
 
-Notice how the header values are UTF-8 encoded. The body here is of the
-default message type:
+Notice how the non-ASCII header values are UTF-8 encoded. The body here is of
+the default message type:
 
     >>> msg.get_default_type()
     'text/plain'
@@ -104,7 +103,8 @@ If we want to use a different content type, we could set it explicitly:
 
 Alternatively, if we know that any ``IText`` field on an object providing
 our ``ITestContent`` interface always stores HTML, could register a custom
-``IFieldMarshaler`` adapter.
+``IFieldMarshaler`` adapter which would indicate this to the message
+constructor. Let's take a look at that now.
 
 Custom marshalers
 -----------------
@@ -138,8 +138,8 @@ register it using the ``zope.component`` API.
 
 Hint: If the schema contained multiple text fields, this adapter would apply
 to all of them. To avoid that, we could either mark the field with a custom
-marker interface (like we did with ``IPrimaryField`` above), or have the
-marshaler check the field name.
+marker interface (similary to the way we marked a field with ``IPrimaryField``
+above), or have the marshaler check the field name.
 
 Let's now try again:
 
@@ -151,6 +151,8 @@ Let's now try again:
     Content-Type: text/html
     <BLANKLINE>
     <p>Test body</p>
+
+Notice how the Content-Type has changed.
 
 Consuming a message
 -------------------

@@ -5,7 +5,6 @@ import these from plone.rfc822 directly, not from this module.
 See interfaces.py for details.
 """
 
-import os
 import logging
 from cStringIO import StringIO
 
@@ -174,10 +173,8 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
         if headerCharset is None:
             headerCharset = charset
         
-        # MIME messages always use CRLF. Most likely, we want the standard
-        # line separator on the server platform.
-        if os.linesep != '\r\n':
-            headerValue = headerValue.replace('\r\n', os.linesep)
+        # MIME messages always use CRLF. For headers, we're probably safer with \n
+        headerValue = headerValue.replace('\r\n', '\n')
         
         try:
             marshaler.demarshal(headerValue, message=message, charset=headerCharset, contentType=contentType, primary=False)

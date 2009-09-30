@@ -354,3 +354,203 @@ own multipart message. To do that, we would simply use the
 
 Which approach works best will depend largely on the intended recipient of
 the message.
+
+Encoding the payload and handling filenames
+-------------------------------------------
+
+Finally, let's consider a more complex example, inspired by the field
+marshaler in ``plone.namedfile``.
+
+Let's say we have a value type intended to represent a binary file with a
+filename and content type:
+
+    >>> from zope.interface import Interface, implements
+    >>> from zope import schema
+    
+    >>> class IFileValue(Interface):
+    ...     data = schema.Bytes(title=u"Raw data")
+    ...     contentType = schema.ASCIILine(title=u"MIME type")
+    ...     filename = schema.ASCIILine(title=u"Filename")
+
+    >>> class FileValue(object):
+    ...     implements(IFileValue)
+    ...     def __init__(self, data, contentType, filename):
+    ...         self.data = data
+    ...         self.contentType = contentType
+    ...         self.filename = filename
+
+Suppose we had a custom field type to represent this:
+
+    >>> from zope.schema.interfaces import IObject
+    >>> class IFileField(IObject):
+    ...     pass
+
+    >>> class FileField(schema.Object):
+    ...     implements(IFileField)
+    ...     schema = IFileValue
+    ...     def __init__(self, **kw):
+    ...         if 'schema' in kw:
+    ...             self.schema = kw.pop('schema')
+    ...         super(FileField, self).__init__(schema=self.schema, **kw)
+
+We can register a field marshaler for this field which will do the following:
+
+* Insist that the field is only used as a primary field, since it makes
+  little sense to encode a binary file in a header.
+* Save the filename in a Content-Disposition header.
+* Be capable of reading the filename again from this header.
+* Encode the payload using base64
+
+    >>> from plone.rfc822.interfaces import IFieldMarshaler
+    >>> from email.Encoders import encode_base64
+
+    >>> from zope.component import adapts
+    >>> from plone.rfc822.defaultfields import BaseFieldMarshaler
+    
+    >>> class FileFieldMarshaler(BaseFieldMarshaler):
+    ...     adapts(Interface, IFileField)
+    ...
+    ...     ascii = False
+    ...
+    ...     def encode(self, value, charset='utf-8', primary=False):
+    ...         if not primary:
+    ...             return None
+    ...         if value is None:
+    ...             return None
+    ...         return value.data
+    ...     
+    ...     def decode(self, value, message=None, charset='utf-8', contentType=None, primary=False):
+    ...         filename = None
+    ...         # get the filename from the Content-Disposition header if possible
+    ...         if primary and message is not None:
+    ...             filename = message.get_filename(None)
+    ...         return FileValue(value, contentType, filename)
+    ...     
+    ...     def getContentType(self):
+    ...         value = self._query()
+    ...         if value is None:
+    ...             return None
+    ...         return value.contentType
+    ...
+    ...     def postProcessMessage(self, message):
+    ...         value = self._query()
+    ...         if value is not None:
+    ...             filename = value.filename
+    ...             if filename:
+    ...                 # Add a new header storing the filename if we have one
+    ...                 message.add_header('Content-Disposition', 'attachment', filename=filename)
+    ...         # Apply base64 encoding
+    ...         encode_base64(message)
+    
+    >>> from zope.component import provideAdapter
+    >>> provideAdapter(FileFieldMarshaler)
+
+To illustrate marshaling, let's create a content object that contains two file
+fields.
+    
+    >>> class IFileContent(Interface):
+    ...     file1 = FileField()
+    ...     file2 = FileField()
+
+    >>> class FileContent(object):
+    ...     implements(IFileContent)
+    ...     file1 = None
+    ...     file2 = None
+
+    >>> fileContent = FileContent()
+    >>> fileContent.file1 = FileValue('dummy file', 'text/plain', 'dummy1.txt')
+    >>> fileContent.file2 = FileValue('<html><body>test</body></html>', 'text/html', 'dummy2.html')
+
+At this point, neither of these fields is marked as a primary field. Let's see
+what happens when we attempt to construct a message from this schema.
+
+    >>> from plone.rfc822 import constructMessageFromSchema
+    >>> message = constructMessageFromSchema(fileContent, IFileContent)
+    >>> print renderMessage(message)
+    <BLANKLINE>
+    <BLANKLINE>
+
+As expected, we got no message headers and no message body. Let's now mark one
+field as primary:
+
+    >>> from plone.rfc822.interfaces import IPrimaryField
+    >>> from zope.interface import alsoProvides
+    >>> alsoProvides(IFileContent['file1'], IPrimaryField)
+    
+    >>> message = constructMessageFromSchema(fileContent, IFileContent)
+    >>> messageBody = renderMessage(message)
+    >>> print messageBody
+    MIME-Version: 1.0
+    Content-Type: text/plain
+    Content-Disposition: attachment; filename="dummy1.txt"
+    Content-Transfer-Encoding: base64
+    <BLANKLINE>
+    ZHVtbXkgZmlsZQ==
+
+Here, we have a base64 encoded payload, a Content-Disposition header, and a
+Content-Type header according to the primary field.
+
+We can also reconstruct the object from this message.
+
+    >>> from plone.rfc822 import initializeObjectFromSchema
+    >>> from email import message_from_string
+    
+    >>> inputMessage = message_from_string(messageBody)
+    >>> newFileContent = FileContent()
+    >>> initializeObjectFromSchema(newFileContent, IFileContent, inputMessage)
+    
+    >>> newFileContent.file1.data
+    'dummy file'
+    >>> newFileContent.file1.contentType
+    'text/plain'
+    >>> newFileContent.file1.filename
+    'dummy1.txt'
+
+    >>> newFileContent.file2 is None
+    True
+
+Let's now show what would happen if we encoded both files in the message.
+In this case, we should get a multipart document with two payloads.
+
+    >>> alsoProvides(IFileContent['file2'], IPrimaryField)
+    >>> message = constructMessageFromSchema(fileContent, IFileContent)
+    >>> messageBody = renderMessage(message)
+    >>> print messageBody # doctest: +ELLIPSIS
+    MIME-Version: 1.0
+    Content-Type: multipart/mixed; boundary="===============...=="
+    <BLANKLINE>
+    --===============...==
+    MIME-Version: 1.0
+    Content-Type: text/plain
+    Content-Disposition: attachment; filename="dummy1.txt"
+    Content-Transfer-Encoding: base64
+    <BLANKLINE>
+    ZHVtbXkgZmlsZQ==
+    --===============...==
+    MIME-Version: 1.0
+    Content-Type: text/html
+    Content-Disposition: attachment; filename="dummy2.html"
+    Content-Transfer-Encoding: base64
+    <BLANKLINE>
+    PGh0bWw+PGJvZHk+dGVzdDwvYm9keT48L2h0bWw+
+    --===============...==--
+
+And again, we can reconstruct the object, this time with both fields:
+
+    >>> inputMessage = message_from_string(messageBody)
+    >>> newFileContent = FileContent()
+    >>> initializeObjectFromSchema(newFileContent, IFileContent, inputMessage)
+    
+    >>> newFileContent.file1.data
+    'dummy file'
+    >>> newFileContent.file1.contentType
+    'text/plain'
+    >>> newFileContent.file1.filename
+    'dummy1.txt'
+
+    >>> newFileContent.file2.data
+    '<html><body>test</body></html>'
+    >>> newFileContent.file2.contentType
+    'text/html'
+    >>> newFileContent.file2.filename
+    'dummy2.html'

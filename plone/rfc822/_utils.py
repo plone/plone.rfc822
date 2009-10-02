@@ -71,6 +71,8 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
         marshaler = queryMultiAdapter((context, field,), IFieldMarshaler)
         if marshaler is not None:
             contentType = marshaler.getContentType()
+            payloadCharset = marshaler.getCharset(charset)
+            
             if contentType is not None:
                 msg.set_type(contentType)
             else:
@@ -78,7 +80,7 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
                 
             value = marshaler.marshal(charset, primary=True)
             if value is not None:
-                msg.set_payload(value)
+                msg.set_payload(value, payloadCharset)
                 
             marshaler.postProcessMessage(msg)
     
@@ -97,6 +99,8 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
             attach = False
             
             contentType = marshaler.getContentType()
+            payloadCharset = marshaler.getCharset(charset)
+            
             if contentType is not None:
                 payload.set_type(contentType)
                 attach = True
@@ -104,8 +108,9 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
                 payload.set_type(defaultType)
             
             value = marshaler.marshal(charset, primary=True)
+            
             if value is not None:
-                payload.set_payload(value)
+                payload.set_payload(value, payloadCharset)
                 attach = True
             
             if attach:
@@ -199,8 +204,9 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                 LOG.debug("No marshaler found for primary field %s of %s" % (name, repr(context),))
             else:
                 payloadValue = message.get_payload(decode=True)
+                payloadCharset = message.get_content_charset(charset)
                 try:
-                    marshaler.demarshal(payloadValue, message=message, charset=charset, contentType=contentType, primary=True)
+                    marshaler.demarshal(payloadValue, message=message, charset=payloadCharset, contentType=contentType, primary=True)
                 except ValueError, e:
                     # interface allows demarshal() to raise ValueError to indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" % (name, repr(context), str(e)))
@@ -227,8 +233,9 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                     continue
                 
                 payloadValue = msg.get_payload(decode=True)
+                payloadCharset = msg.get_content_charset(charset)
                 try:
-                    marshaler.demarshal(payloadValue, message=msg, charset=charset, contentType=contentType, primary=True)
+                    marshaler.demarshal(payloadValue, message=msg, charset=payloadCharset, contentType=contentType, primary=True)
                 except ValueError, e:
                     # interface allows demarshal() to raise ValueError to indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" % (name, repr(context), str(e)))

@@ -78,9 +78,11 @@ The output looks like this:
     title: =?utf-8?q?Test_title?=
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     MIME-Version: 1.0
-    Content-Type: text/plain
+    Content-Type: text/plain; charset="utf-8"
+    Content-Transfer-Encoding: base64
     <BLANKLINE>
-    <p>Test body</p>
+    PHA+VGVzdCBib2R5PC9wPg==
+    <BLANKLINE>
 
 Notice how the non-ASCII header values are UTF-8 encoded. The body here is of
 the default message type:
@@ -90,16 +92,21 @@ the default message type:
 
 This is because none of the default field types manage a content type.
 
+The body is also utf-8 encoded, because the primary field specified this
+encoding. For this reason, it is also base64 encoded.
+
 If we want to use a different content type, we could set it explicitly:
 
     >>> msg.set_type('text/html')
     >>> print renderMessage(msg)
     title: =?utf-8?q?Test_title?=
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    Content-Transfer-Encoding: base64
     MIME-Version: 1.0
-    Content-Type: text/html
+    Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
-    <p>Test body</p>
+    PHA+VGVzdCBib2R5PC9wPg==
+    <BLANKLINE>
 
 Alternatively, if we know that any ``IText`` field on an object providing
 our ``ITestContent`` interface always stores HTML, could register a custom
@@ -118,7 +125,7 @@ and the field instance to ``IFieldMarshaler``:
     <plone.rfc822.defaultfields.UnicodeFieldMarshaler object at ...>
 
 Let's now create our own marshaler by extending this class and overriding
-the ``getContentType()`` method:
+the ``getContentType()`` and ``getCharset()`` methods:
 
     >>> from plone.rfc822.defaultfields import UnicodeFieldMarshaler
     >>> from zope.schema.interfaces import IText
@@ -129,6 +136,15 @@ the ``getContentType()`` method:
     ...     
     ...     def getContentType(self):
     ...         return 'text/html'
+    ...     
+    ...     def getCharset(self, default='utf-8'):
+    ...         return None
+
+Here, we have indicated that the body text should not have a charset at all.
+This would not normally be advisable for unicode text, but in this case, we
+will allow it to illustrate the result of such an override. The default
+implementation for the UnicodeFieldMarshaler simply returns the default
+charset, which is usually utf-8.
 
 Ordinarily, we'd register this with ZCML. For the purpose of the test, we'll
 register it using the ``zope.component`` API.
@@ -181,6 +197,33 @@ schema. This should be the same schema as the one used to construct the
 message.
 
     >>> from plone.rfc822 import initializeObjectFromSchema
+    >>> initializeObjectFromSchema(newContent, ITestContent, msg)
+
+    >>> newContent.title
+    u'Test title'
+    >>> newContent.description
+    u'Test description\nwith a newline'
+    >>> newContent.body
+    u'<p>Test body</p>'
+
+We can also consume messages with a transfer encoding and a charset:
+
+    >>> messageBody = """\
+    ... title: =?utf-8?q?Test_title?=
+    ... description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    ... Content-Transfer-Encoding: base64
+    ... MIME-Version: 1.0
+    ... Content-Type: text/html; charset="utf-8"
+    ... <BLANKLINE>
+    ... PHA+VGVzdCBib2R5PC9wPg==
+    ... <BLANKLINE>"""
+
+    >>> msg = message_from_string(messageBody)
+    >>> msg.get_content_type()
+    'text/html'
+    >>> msg.get_content_charset()
+    'utf-8'
+    
     >>> initializeObjectFromSchema(newContent, ITestContent, msg)
 
     >>> newContent.title
@@ -280,8 +323,9 @@ primary fields, we will get a multipart message with two attachments.
 (Note that we've used ellipses here for the doctest to work with the generated
 boundary string).
 
-Notice how both messages have a MIME type of 'text/html'. That is because of
-the custom adapter for ``(ITestContent, IText)`` which we registered earlier.
+Notice how both messages have a MIME type of 'text/html' and no charset.
+That is because of the custom adapter for ``(ITestContent, IText)`` which we
+registered earlier.
 
 We can obviously read this message as well. Note that in this case, the order
 of fields passed to ``initializeObject()`` is important, both to determine
@@ -433,6 +477,9 @@ We can register a field marshaler for this field which will do the following:
     ...         if value is None:
     ...             return None
     ...         return value.contentType
+    ...
+    ...     def getCharset(self, default='utf-8'):
+    ...         return None # this is not text data!
     ...
     ...     def postProcessMessage(self, message):
     ...         value = self._query()

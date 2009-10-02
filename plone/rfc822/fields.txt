@@ -110,6 +110,8 @@ Text
     u'text\xd8'
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8')
+    'utf-8'
     >>> marshaler.ascii
     False
 
@@ -123,6 +125,8 @@ TextLine
     u'textline\xd8'
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8')
+    'utf-8'
     >>> marshaler.ascii
     False
 
@@ -136,6 +140,8 @@ Password
     u'password\xd8'
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8')
+    'utf-8'
     >>> marshaler.ascii
     False
 
@@ -148,6 +154,8 @@ Bytes
     >>> marshaler.decode('bytes')
     'bytes'
     >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii
     True
@@ -162,6 +170,8 @@ BytesLine
     'bytesline'
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8') is None
+    True
     >>> marshaler.ascii
     True
 
@@ -174,6 +184,8 @@ ASCII
     >>> marshaler.decode('ascii')
     'ascii'
     >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii
     True
@@ -188,6 +200,8 @@ ASCIILine
     'asciiline'
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8') is None
+    True
     >>> marshaler.ascii
     True
 
@@ -201,6 +215,8 @@ URI
     'http://plone.org'
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8') is None
+    True
     >>> marshaler.ascii
     True
 
@@ -212,6 +228,8 @@ Id
     'some.id'
     >>> marshaler.decode('some.id')
     'some.id'
+    >>> marshaler.getCharset('utf-8') is None
+    True
     >>> marshaler.getContentType() is None
     True
     >>> marshaler.ascii
@@ -226,6 +244,8 @@ DottedName
     >>> marshaler.decode('dotted.name')
     'dotted.name'
     >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii
     True
@@ -246,6 +266,8 @@ Bool
     False
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8') is None
+    True
     >>> marshaler.ascii
     True
 
@@ -258,6 +280,8 @@ Int
     >>> marshaler.decode('-10')
     -10
     >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii
     True
@@ -272,6 +296,8 @@ Float
     0.25
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8') is None
+    True
     >>> marshaler.ascii
     True
 
@@ -285,6 +311,8 @@ Choice
     u'one'
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8')
+    'utf-8'
     >>> marshaler.ascii
     False
     
@@ -295,6 +323,8 @@ Choice
     u'three'
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8')
+    'utf-8'
     >>> marshaler.ascii
     False
 
@@ -307,6 +337,8 @@ Datetime
     >>> marshaler.decode('2009-01-02T15:10:05.000001+01:00')
     datetime.datetime(2009, 1, 2, 15, 10, 5, 1, tzinfo=tzoffset(None, 3600))
     >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii
     True
@@ -321,6 +353,8 @@ Date
     datetime.date(2008, 2, 3)
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8') is None
+    True
     >>> marshaler.ascii
     True
 
@@ -333,6 +367,8 @@ Timedelta
     >>> marshaler.decode('3:4:5')
     datetime.timedelta(3, 4, 5)
     >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii
     True
@@ -347,6 +383,8 @@ Tuple
     (u'one\xd8', u'two')
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8')
+    'utf-8'
     >>> marshaler.ascii # depends on value_type
     False
 
@@ -359,6 +397,8 @@ List
     >>> marshaler.decode('three||four')
     ['three', 'four']
     >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii # depends on value_type
     True
@@ -373,6 +413,8 @@ Set
     True
     >>> marshaler.getContentType() is None
     True
+    >>> marshaler.getCharset('utf-8') is None
+    True
     >>> marshaler.ascii # depends on value_type
     True
 
@@ -385,6 +427,8 @@ Frozenset
     >>> marshaler.decode('3:4:5||5:4:3') == frozenset([datetime.timedelta(3, 4, 5), datetime.timedelta(5, 4, 3)])
     True
     >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii # depends on value_type
     True

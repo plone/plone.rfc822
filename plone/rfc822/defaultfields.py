@@ -81,6 +81,9 @@ class BaseFieldMarshaler(object):
     def getContentType(self):
         return None
     
+    def getCharset(self, default='utf-8'):
+        return None
+    
     def postProcessMessage(self, message):
         pass
     
@@ -112,13 +115,19 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
             return self.field.fromUnicode(unicodeValue)
         except Exception, e:
             raise ValueError(e)
-
+    
+    def getCharset(self, default='utf-8'):
+        return default
+    
 class ASCIISafeFieldMarshaler(UnicodeFieldMarshaler):
     """Default marshaler for fields that are ASCII safe, but still support
     IFromUnicode. This includes Int, Float and Bool.
     """
     
     ascii = True
+    
+    def getCharset(self, default='utf-8'):
+        return None
     
 class BytesFieldMarshaler(BaseFieldMarshaler):
     """Default marshaler for IBytes fields and children. These store str
@@ -216,7 +225,13 @@ class CollectionMarshaler(BaseFieldMarshaler):
         if valueTypeMarshaler is None:
             return False
         return valueTypeMarshaler.ascii
-
+    
+    def getCharset(self, default='utf-8'):
+        valueTypeMarshaler = queryMultiAdapter((self.context, self.field.value_type,), IFieldMarshaler)
+        if valueTypeMarshaler is None:
+            return None
+        return valueTypeMarshaler.getCharset(default)
+    
     def encode(self, value, charset='utf-8', primary=False):
         if value is None:
             return None

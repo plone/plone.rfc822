@@ -22,18 +22,18 @@ It consists of:
 The helper methods are described by ``plone.rfc822.interfaces.IMessageAPI``,
 and are importable directly from the ``plone.rfc822`` package::
 
-    def constructMessageFromSchema(context, schema, charset='utf-8', defaultType='text/plain'):
+    def constructMessageFromSchema(context, schema, charset='utf-8'):
         """Convenience method which calls ``constructMessage()`` with all the
         fields, in order, of the given schema interface
         """
     
-    def constructMessageFromSchemata(context, schemata, charset='utf-8', defaultType='text/plain'):
+    def constructMessageFromSchemata(context, schemata, charset='utf-8'):
         """Convenience method which calls ``constructMessage()`` with all the
         fields, in order, of all the given schemata (a sequence of schema
         interfaces).
         """
     
-    def constructMessage(context, fields, charset='utf-8', defaultType='text/plain'):
+    def constructMessage(context, fields, charset='utf-8'):
         """Helper method to construct a message.
     
         ``context`` is a content object.
@@ -43,10 +43,6 @@ and are importable directly from the ``plone.rfc822`` package::
         for example.
     
         ``charset`` is the message charset.
-    
-        ``defaultType`` is the default MIME type to use if the primary field
-        marshaler returns None when getContentType() is called. It should either
-        be 'text/plain' or 'message/rfc822'.
     
         The message body will be constructed from the primary field, i.e. the
         field which is marked with ``IPrimaryField``. If no such field exists,

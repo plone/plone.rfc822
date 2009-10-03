@@ -21,18 +21,17 @@ from plone.rfc822.interfaces import IPrimaryField
 
 LOG = logging.getLogger('plone.rfc822')
 
-def constructMessageFromSchema(context, schema, charset='utf-8', defaultType='text/plain'):
-    return constructMessage(context, getFieldsInOrder(schema), charset, defaultType)
+def constructMessageFromSchema(context, schema, charset='utf-8'):
+    return constructMessage(context, getFieldsInOrder(schema), charset)
 
-def constructMessageFromSchemata(context, schemata, charset='utf-8', defaultType='text/plain'):    
+def constructMessageFromSchemata(context, schemata, charset='utf-8'):
     fields = []
     for schema in schemata:
         fields.extend(getFieldsInOrder(schema))
-    return constructMessage(context, fields, charset, defaultType)
+    return constructMessage(context, fields, charset)
 
-def constructMessage(context, fields, charset='utf-8', defaultType='text/plain'):    
+def constructMessage(context, fields, charset='utf-8'):
     msg = Message()
-    msg.set_default_type(defaultType)
     
     primary = []
     
@@ -75,8 +74,6 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
             
             if contentType is not None:
                 msg.set_type(contentType)
-            else:
-                msg.set_type(defaultType)
                 
             value = marshaler.marshal(charset, primary=True)
             if value is not None:
@@ -104,8 +101,6 @@ def constructMessage(context, fields, charset='utf-8', defaultType='text/plain')
             if contentType is not None:
                 payload.set_type(contentType)
                 attach = True
-            else:
-                payload.set_type(defaultType)
             
             value = marshaler.marshal(charset, primary=True)
             

@@ -118,6 +118,20 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
     
     def getCharset(self, default='utf-8'):
         return default
+
+class UnicodeValueFieldMarshaler(UnicodeFieldMarshaler):
+    """Default marshaler for fields that contain unicode data and so may be
+    ASCII safe.
+    """
+    
+    @property
+    def ascii(self):
+        value = self._query()
+        if value is None:
+            return True
+        if max(map(ord, value)) < 128:
+            return True
+        return False
     
 class ASCIISafeFieldMarshaler(UnicodeFieldMarshaler):
     """Default marshaler for fields that are ASCII safe, but still support
@@ -219,12 +233,7 @@ class CollectionMarshaler(BaseFieldMarshaler):
     
     adapts(Interface, ICollection)
 
-    @property
-    def ascii(self):
-        valueTypeMarshaler = queryMultiAdapter((self.context, self.field.value_type,), IFieldMarshaler)
-        if valueTypeMarshaler is None:
-            return False
-        return valueTypeMarshaler.ascii
+    ascii = False
     
     def getCharset(self, default='utf-8'):
         valueTypeMarshaler = queryMultiAdapter((self.context, self.field.value_type,), IFieldMarshaler)

@@ -107,7 +107,11 @@ class IFieldMarshaler(Interface):
         ``primary`` is set to True if the field being marshalled is a primary
         field, i.e. it will be used in the message body.
         
-        The returned value must be a string.
+        The returned value must be a string, or None if there is no value
+        in the field.
+        
+        Raise ``ValueError`` if marshaling is impossible. The field will be
+        skipped.
         """
     
     def demarshal(value, message=None, charset='utf-8', contentType=None, primary=False):

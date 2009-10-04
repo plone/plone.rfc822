@@ -47,14 +47,18 @@ def constructMessage(context, fields, charset='utf-8'):
             LOG.debug("No marshaler found for field %s of %s" % (name, repr(context)))
             continue
         
-        value = marshaler.marshal(charset, primary=False)
-        if value is None:
+        try:
+            value = marshaler.marshal(charset, primary=False)
+        except ValueError, e:
+            LOG.debug("Marshaling of %s for %s failed: %s" % (name, repr(context), str(e)))
             continue
         
-        if not isinstance(value, str):
+        if value is None:
+            value = ''
+        elif not isinstance(value, str):
             raise ValueError("Marshaler for field %s did not return a string" % name)
         
-        if marshaler.ascii:
+        if marshaler.ascii and '\n' not in value:
             msg[name] = value
         else:
             msg[name] = Header(value, charset)

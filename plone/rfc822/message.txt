@@ -42,6 +42,7 @@ To illustrate the pattern, consider the following schema interface:
     ...     title = schema.TextLine(title=u"Title")
     ...     description = schema.Text(title=u"Description")
     ...     body = schema.Text(title=u"Body text")
+    ...     emptyfield = schema.TextLine(title=u"Empty field")
 
 The primary field instance is marked like this:
 
@@ -59,6 +60,7 @@ marshal to a message.
     ...     title = u""
     ...     description = u""
     ...     body = u""
+    ...     emptyfield = None
 
     >>> content = TestContent()
     >>> content.title = u"Test title"
@@ -75,8 +77,9 @@ The output looks like this:
 
     >>> from plone.rfc822 import renderMessage
     >>> print renderMessage(msg)
-    title: =?utf-8?q?Test_title?=
+    title: Test title
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    emptyfield: 
     MIME-Version: 1.0
     Content-Type: text/plain; charset="utf-8"
     Content-Transfer-Encoding: base64
@@ -84,8 +87,11 @@ The output looks like this:
     PHA+VGVzdCBib2R5PC9wPg==
     <BLANKLINE>
 
-Notice how the non-ASCII header values are UTF-8 encoded. The body here is of
-the default message type:
+Notice how the non-ASCII header values are UTF-8 encoded. The encoding
+algorithm is clever enough to only encode the value if it is necessary,
+leaving more readable field values otherwise.
+
+The body here is of the default message type:
 
     >>> msg.get_default_type()
     'text/plain'
@@ -99,8 +105,9 @@ If we want to use a different content type, we could set it explicitly:
 
     >>> msg.set_type('text/html')
     >>> print renderMessage(msg)
-    title: =?utf-8?q?Test_title?=
+    title: Test title
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    emptyfield: 
     Content-Transfer-Encoding: base64
     MIME-Version: 1.0
     Content-Type: text/html; charset="utf-8"
@@ -122,16 +129,16 @@ and the field instance to ``IFieldMarshaler``:
     >>> from zope.component import getMultiAdapter
     >>> from plone.rfc822.interfaces import IFieldMarshaler
     >>> getMultiAdapter((content, ITestContent['body'],), IFieldMarshaler)
-    <plone.rfc822.defaultfields.UnicodeFieldMarshaler object at ...>
+    <plone.rfc822.defaultfields.UnicodeValueFieldMarshaler object at ...>
 
 Let's now create our own marshaler by extending this class and overriding
 the ``getContentType()`` and ``getCharset()`` methods:
 
-    >>> from plone.rfc822.defaultfields import UnicodeFieldMarshaler
+    >>> from plone.rfc822.defaultfields import UnicodeValueFieldMarshaler
     >>> from zope.schema.interfaces import IText
     >>> from zope.component import adapts
 
-    >>> class TestBodyMarshaler(UnicodeFieldMarshaler):
+    >>> class TestBodyMarshaler(UnicodeValueFieldMarshaler):
     ...     adapts(ITestContent, IText)
     ...     
     ...     def getContentType(self):
@@ -161,8 +168,9 @@ Let's now try again:
 
     >>> msg = constructMessageFromSchema(content, ITestContent)
     >>> print renderMessage(msg)
-    title: =?utf-8?q?Test_title?=
+    title: Test title
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    emptyfield: 
     MIME-Version: 1.0
     Content-Type: text/html
     <BLANKLINE>
@@ -288,7 +296,7 @@ Here are the fields it will see:
     ...             getFieldsInOrder(IPersonalDetails)
 
     >>> [f[0] for f in allFields]
-    ['title', 'description', 'body', 'description', 'currentAge', 'personalProfile']
+    ['title', 'description', 'body', 'emptyfield', 'description', 'currentAge', 'personalProfile']
 
     >>> [f[0] for f in allFields if IPrimaryField.providedBy(f[1])]
     ['body', 'personalProfile']
@@ -301,9 +309,10 @@ primary fields, we will get a multipart message with two attachments.
     >>> msg = constructMessageFromSchemata(content, (ITestContent, IPersonalDetails,))
     >>> msgString = renderMessage(msg)
     >>> print msgString
-    title: =?utf-8?q?Test_title?=
+    title: Test title
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
-    description: =?utf-8?b?PHA+TXkgZGVzY3JpcHRpb248L3A+?=
+    emptyfield: 
+    description: <p>My description</p>
     currentAge: 21
     MIME-Version: 1.0
     Content-Type: multipart/mixed; boundary="===============...=="
@@ -383,14 +392,15 @@ own multipart message. To do that, we would simply use the
     MIME-Version: 1.0
     <BLANKLINE>
     --===============...==
-    title: =?utf-8?q?Test_title?=
+    title: Test title
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    emptyfield: 
     MIME-Version: 1.0
     Content-Type: text/html
     <BLANKLINE>
     <p>Test body</p>
     --===============...==
-    description: =?utf-8?b?PHA+TXkgZGVzY3JpcHRpb248L3A+?=
+    description: <p>My description</p>
     currentAge: 21
     MIME-Version: 1.0
     Content-Type: text/html
@@ -460,7 +470,7 @@ We can register a field marshaler for this field which will do the following:
     ...
     ...     def encode(self, value, charset='utf-8', primary=False):
     ...         if not primary:
-    ...             return None
+    ...             raise ValueError("File field cannot be marshaled as a non-primary field")
     ...         if value is None:
     ...             return None
     ...         return value.data

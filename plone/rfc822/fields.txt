@@ -32,8 +32,11 @@ we support.
 
     >>> class ITestContent(Interface):
     ...     _text = schema.Text()
+    ...     _text2 = schema.Text()
     ...     _textLine = schema.TextLine()
+    ...     _textLine2 = schema.TextLine()
     ...     _password = schema.Password()
+    ...     _password2 = schema.Password()
     ...     _bytes = schema.Bytes()
     ...     _bytesLine = schema.BytesLine()
     ...     _ascii = schema.ASCII()
@@ -61,8 +64,11 @@ This interface is implemented by a the following class:
     >>> class TestContent(object):
     ...     implements(ITestContent)
     ...     _text = u"text\xd8"
+    ...     _text2 = u"text" # ascii safe
     ...     _textLine = u"textline\xd8"
+    ...     _textLine2 = u"textline" # ascii safe
     ...     _password = u"password\xd8"
+    ...     _password2 = u"password" # ascii safe
     ...     _bytes = 'bytes'
     ...     _bytesLine = 'bytesline'
     ...     _ascii = 'ascii'
@@ -96,7 +102,7 @@ Notes:
 * Unicode \xd8 (capital letter O with stroke) is \xc3\x98 in unicode.
 * None of the default marshalers support getContentType(), i.e. they all
   return None
-* For simplicity, we do not set ``demarshal()`` for each field. For all the
+* For simplicity, we do not call ``demarshal()`` for each field. For all the
   standard marshalers, this simply sets the value returned by ``extract()``
   using the ``set()`` method on the field instance.
 
@@ -115,6 +121,21 @@ Text
     >>> marshaler.ascii
     False
 
+Text field types and derivatives will return True for the ``ascii`` property
+if the field value is within the ascii range.
+
+    >>> marshaler = getMultiAdapter((t, ITestContent['_text2']), IFieldMarshaler)
+    >>> marshaler.marshal()
+    'text'
+    >>> marshaler.decode('text\xc3\x98')
+    u'text\xd8'
+    >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8')
+    'utf-8'
+    >>> marshaler.ascii
+    True
+
 TextLine
 --------
 
@@ -130,6 +151,21 @@ TextLine
     >>> marshaler.ascii
     False
 
+Text field types and derivatives will return True for the ``ascii`` property
+if the field value is within the ascii range.
+
+    >>> marshaler = getMultiAdapter((t, ITestContent['_textLine2']), IFieldMarshaler)
+    >>> marshaler.marshal()
+    'textline'
+    >>> marshaler.decode('textline\xc3\x98')
+    u'textline\xd8'
+    >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8')
+    'utf-8'
+    >>> marshaler.ascii
+    True
+
 Password
 --------
 
@@ -144,6 +180,21 @@ Password
     'utf-8'
     >>> marshaler.ascii
     False
+
+Text field types and derivatives will return True for the ``ascii`` property
+if the field value is within the ascii range.
+
+    >>> marshaler = getMultiAdapter((t, ITestContent['_password2']), IFieldMarshaler)
+    >>> marshaler.marshal()
+    'password'
+    >>> marshaler.decode('password\xc3\x98')
+    u'password\xd8'
+    >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8')
+    'utf-8'
+    >>> marshaler.ascii
+    True
 
 Bytes
 -----
@@ -314,7 +365,7 @@ Choice
     >>> marshaler.getCharset('utf-8')
     'utf-8'
     >>> marshaler.ascii
-    False
+    True
     
     >>> marshaler = getMultiAdapter((t, ITestContent['_choice2']), IFieldMarshaler)
     >>> marshaler.marshal()
@@ -326,7 +377,7 @@ Choice
     >>> marshaler.getCharset('utf-8')
     'utf-8'
     >>> marshaler.ascii
-    False
+    True
 
 Datetime
 --------
@@ -385,7 +436,7 @@ Tuple
     True
     >>> marshaler.getCharset('utf-8')
     'utf-8'
-    >>> marshaler.ascii # depends on value_type
+    >>> marshaler.ascii
     False
 
 List
@@ -400,8 +451,8 @@ List
     True
     >>> marshaler.getCharset('utf-8') is None
     True
-    >>> marshaler.ascii # depends on value_type
-    True
+    >>> marshaler.ascii
+    False
 
 Set
 ---
@@ -415,8 +466,8 @@ Set
     True
     >>> marshaler.getCharset('utf-8') is None
     True
-    >>> marshaler.ascii # depends on value_type
-    True
+    >>> marshaler.ascii
+    False
 
 Frozenset
 ---------
@@ -430,5 +481,5 @@ Frozenset
     True
     >>> marshaler.getCharset('utf-8') is None
     True
-    >>> marshaler.ascii # depends on value_type
-    True
+    >>> marshaler.ascii
+    False

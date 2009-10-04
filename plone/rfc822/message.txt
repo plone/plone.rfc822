@@ -80,12 +80,9 @@ The output looks like this:
     title: Test title
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     emptyfield: 
-    MIME-Version: 1.0
     Content-Type: text/plain; charset="utf-8"
-    Content-Transfer-Encoding: base64
     <BLANKLINE>
-    PHA+VGVzdCBib2R5PC9wPg==
-    <BLANKLINE>
+    <p>Test body</p>
 
 Notice how the non-ASCII header values are UTF-8 encoded. The encoding
 algorithm is clever enough to only encode the value if it is necessary,
@@ -99,7 +96,7 @@ The body here is of the default message type:
 This is because none of the default field types manage a content type.
 
 The body is also utf-8 encoded, because the primary field specified this
-encoding. For this reason, it is also base64 encoded.
+encoding.
 
 If we want to use a different content type, we could set it explicitly:
 
@@ -108,12 +105,10 @@ If we want to use a different content type, we could set it explicitly:
     title: Test title
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     emptyfield: 
-    Content-Transfer-Encoding: base64
     MIME-Version: 1.0
     Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
-    PHA+VGVzdCBib2R5PC9wPg==
-    <BLANKLINE>
+    <p>Test body</p>
 
 Alternatively, if we know that any ``IText`` field on an object providing
 our ``ITestContent`` interface always stores HTML, could register a custom
@@ -132,7 +127,7 @@ and the field instance to ``IFieldMarshaler``:
     <plone.rfc822.defaultfields.UnicodeValueFieldMarshaler object at ...>
 
 Let's now create our own marshaler by extending this class and overriding
-the ``getContentType()`` and ``getCharset()`` methods:
+the ``getContentType()``:
 
     >>> from plone.rfc822.defaultfields import UnicodeValueFieldMarshaler
     >>> from zope.schema.interfaces import IText
@@ -143,15 +138,6 @@ the ``getContentType()`` and ``getCharset()`` methods:
     ...     
     ...     def getContentType(self):
     ...         return 'text/html'
-    ...     
-    ...     def getCharset(self, default='utf-8'):
-    ...         return None
-
-Here, we have indicated that the body text should not have a charset at all.
-This would not normally be advisable for unicode text, but in this case, we
-will allow it to illustrate the result of such an override. The default
-implementation for the UnicodeFieldMarshaler simply returns the default
-charset, which is usually utf-8.
 
 Ordinarily, we'd register this with ZCML. For the purpose of the test, we'll
 register it using the ``zope.component`` API.
@@ -172,7 +158,7 @@ Let's now try again:
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     emptyfield: 
     MIME-Version: 1.0
-    Content-Type: text/html
+    Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
     <p>Test body</p>
 
@@ -190,9 +176,8 @@ We then need to obtain a ``Message`` object. The ``email`` module contains
 helper functions for this purpose.
 
     >>> messageBody = """\
-    ... title: =?utf-8?q?Test_title?=
+    ... title: Test title
     ... description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
-    ... MIME-Version: 1.0
     ... Content-Type: text/html
     ...
     ... <p>Test body</p>"""
@@ -220,7 +205,6 @@ We can also consume messages with a transfer encoding and a charset:
     ... title: =?utf-8?q?Test_title?=
     ... description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     ... Content-Transfer-Encoding: base64
-    ... MIME-Version: 1.0
     ... Content-Type: text/html; charset="utf-8"
     ... <BLANKLINE>
     ... PHA+VGVzdCBib2R5PC9wPg==
@@ -319,12 +303,12 @@ primary fields, we will get a multipart message with two attachments.
     <BLANKLINE>
     --===============...==
     MIME-Version: 1.0
-    Content-Type: text/html
+    Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
     <p>Test body</p>
     --===============...==
     MIME-Version: 1.0
-    Content-Type: text/html
+    Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
     <p>My profile</p>
     --===============...==--
@@ -396,14 +380,14 @@ own multipart message. To do that, we would simply use the
     description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
     emptyfield: 
     MIME-Version: 1.0
-    Content-Type: text/html
+    Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
     <p>Test body</p>
     --===============...==
     description: <p>My description</p>
     currentAge: 21
     MIME-Version: 1.0
-    Content-Type: text/html
+    Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
     <p>My profile</p>
     --===============...==--

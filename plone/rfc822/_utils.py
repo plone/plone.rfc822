@@ -78,11 +78,16 @@ def constructMessage(context, fields, charset='utf-8'):
             
             if contentType is not None:
                 msg.set_type(contentType)
+            
+            if payloadCharset is not None:
+                # using set_charset() would also add transfer encoding,
+                # which we don't want to do always
+                msg.set_param('charset', payloadCharset)
                 
             value = marshaler.marshal(charset, primary=True)
             if value is not None:
-                msg.set_payload(value, payloadCharset)
-                
+                msg.set_payload(value)
+            
             marshaler.postProcessMessage(msg)
     
     # Otherwise, we return a multipart message
@@ -105,11 +110,16 @@ def constructMessage(context, fields, charset='utf-8'):
             if contentType is not None:
                 payload.set_type(contentType)
                 attach = True
+            if payloadCharset is not None:
+                # using set_charset() would also add transfer encoding,
+                # which we don't want to do always
+                payload.set_param('charset', payloadCharset)
+                attach = True
             
             value = marshaler.marshal(charset, primary=True)
             
             if value is not None:
-                payload.set_payload(value, payloadCharset)
+                payload.set_payload(value)
                 attach = True
             
             if attach:
@@ -142,6 +152,8 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
     contentType = message.get_content_type()
     
     charset = message.get_charset()
+    if charset is None:
+        charset = message.get_param('charset')
     if charset is not None:
         charset = str(charset)
     else:

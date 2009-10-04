@@ -70,7 +70,10 @@ class BaseFieldMarshaler(object):
         return self.encode(value, charset, primary)
     
     def demarshal(self, value, message=None, charset='utf-8', contentType=None, primary=False):
-        self._set(self.decode(value, message, charset, contentType, primary))
+        fieldValue = self.field.missing_value
+        if value:
+            fieldValue = self.decode(value, message, charset, contentType, primary)
+        self._set(fieldValue)
     
     def encode(self, value, charset='utf-8', primary=False):
         return None
@@ -127,7 +130,7 @@ class UnicodeValueFieldMarshaler(UnicodeFieldMarshaler):
     @property
     def ascii(self):
         value = self._query()
-        if value is None:
+        if not value:
             return True
         if max(map(ord, value)) < 128:
             return True

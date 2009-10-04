@@ -42,7 +42,7 @@ To illustrate the pattern, consider the following schema interface:
     ...     title = schema.TextLine(title=u"Title")
     ...     description = schema.Text(title=u"Description")
     ...     body = schema.Text(title=u"Body text")
-    ...     emptyfield = schema.TextLine(title=u"Empty field")
+    ...     emptyfield = schema.TextLine(title=u"Empty field", missing_value=u'missing')
 
 The primary field instance is marked like this:
 
@@ -204,6 +204,7 @@ We can also consume messages with a transfer encoding and a charset:
     >>> messageBody = """\
     ... title: =?utf-8?q?Test_title?=
     ... description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
+    ... emptyfield: 
     ... Content-Transfer-Encoding: base64
     ... Content-Type: text/html; charset="utf-8"
     ... <BLANKLINE>
@@ -224,6 +225,11 @@ We can also consume messages with a transfer encoding and a charset:
     u'Test description\nwith a newline'
     >>> newContent.body
     u'<p>Test body</p>'
+
+Note: Empty fields will result in the field's ``missing_value`` being used:
+
+    >>> newContent.emptyfield
+    u'missing'
 
 Handling multiple primary fields and duplicate field names
 ----------------------------------------------------------

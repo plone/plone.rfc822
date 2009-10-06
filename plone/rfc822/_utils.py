@@ -203,6 +203,10 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
     
     payload = message.get_payload()
     
+    # do nothing if we don't have a payload
+    if not payload:
+        return
+    
     # A single string payload
     if isinstance(payload, str):
         if len(primary) != 1:

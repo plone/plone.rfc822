@@ -1,9 +1,19 @@
+from zope.interface import Attribute
 from zope.interface import Interface
 from zope import schema
 
 class IPrimaryField(Interface):
     """Marker interface for the primary field in a schema
     """
+
+class IPrimaryFieldInfo(Interface):
+    """Information about the primary field of a content item
+    
+    Content type frameworks should register an adapter to this interface.
+    """
+    fieldname = Attribute("Field name")
+    field = Attribute("Field")
+    value = Attribute("Field value")
 
 class IMessageAPI(Interface):
     """Functions provided by this module

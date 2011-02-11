@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.0b2 (unreleased)
+1.0b2 (2011-02-11)
 ------------------
 
 * Add IPrimaryFieldInfo to look up primary field information on a content item.

@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.0b2'
+version = '1.0'
 
 setup(name='plone.rfc822',
       version=version,
@@ -14,12 +14,13 @@ setup(name='plone.rfc822',
         "Framework :: Plone",
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
+        "License :: OSI Approved :: BSD License",
         ],
       keywords='zope schema rfc822',
       author='Martin Aspeli',
       author_email='optilude@gmail.com',
       url='http://pypi.python.org/pypi/plone.rfc822',
-      license='GPL',
+      license='BSD',
       packages=find_packages(exclude=['ez_setup']),
       namespace_packages=['plone'],
       include_package_data=True,

@@ -133,3 +133,9 @@ a field as the primary field::
 ``plone.supermodel`` may be installed as a dependency using the extra
 ``[supermodel]``, but this is probably only useful for running the tests. If
 the package is not installed, the handler will not be ignored.
+
+License note
+------------
+
+This package is released under the BSD license. Contributors, please do not
+add dependencies on GPL code.

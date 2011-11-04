@@ -99,7 +99,7 @@ extraction methods.
 
 Notes: 
 
-* Unicode \xd8 (capital letter O with stroke) is \xc3\x98 in unicode.
+* Unicode \xd8 (capital letter O with stroke) is \xc3\x98 in UTF-8.
 * None of the default marshalers support getContentType(), i.e. they all
   return None
 * For simplicity, we do not call ``demarshal()`` for each field. For all the

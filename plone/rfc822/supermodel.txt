@@ -64,12 +64,12 @@ on which it is marked:
 
     >>> from plone.supermodel import serializeSchema
     >>> print serializeSchema(ITestSchema) # doctest: +NORMALIZE_WHITESPACE
-    <model xmlns:marshal="http://namespaces.plone.org/supermodel/marshal" xmlns="http://namespaces.plone.org/supermodel/schema">
+    <model xmlns="http://namespaces.plone.org/supermodel/schema">
       <schema based-on="zope.interface.Interface">
         <field name="title" type="zope.schema.TextLine">
           <title>Title</title>
         </field>
-        <field name="body" type="zope.schema.Text" marshal:primary="true">
+        <field name="body" type="zope.schema.Text" marshal:primary="true" xmlns:marshal="http://namespaces.plone.org/supermodel/marshal">
           <title>Body</title>
         </field>
       </schema>

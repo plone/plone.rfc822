@@ -23,13 +23,17 @@
         factory=".defaultfields.UnicodeValueFieldMarshaler"
         />
     
-    <!-- Int and Float are ASCII safe -->
+    <!-- Int, Float, and Decimal are ASCII safe -->
     <adapter
         for="* zope.schema.interfaces.IInt"
         factory=".defaultfields.ASCIISafeFieldMarshaler"
         />
     <adapter
         for="* zope.schema.interfaces.IFloat"
+        factory=".defaultfields.ASCIISafeFieldMarshaler"
+        />
+    <adapter
+        for="* zope.schema.interfaces.IDecimal"
         factory=".defaultfields.ASCIISafeFieldMarshaler"
         />
         

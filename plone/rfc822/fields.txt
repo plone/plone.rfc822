@@ -47,6 +47,7 @@ we support.
     ...     _bool = schema.Bool()
     ...     _int = schema.Int()
     ...     _float = schema.Float()
+    ...     _decimal = schema.Decimal()
     ...     _choice1 = schema.Choice(values=[u"one", u"two", u"three"])
     ...     _choice2 = schema.Choice(values=["one", "two", "three"])
     ...     _datetime = schema.Datetime()
@@ -61,6 +62,7 @@ This interface is implemented by a the following class:
 
     >>> from zope.interface import implements
     >>> import datetime
+    >>> from decimal import Decimal
     >>> class TestContent(object):
     ...     implements(ITestContent)
     ...     _text = u"text\xd8"
@@ -79,6 +81,7 @@ This interface is implemented by a the following class:
     ...     _bool = True
     ...     _int = -10l
     ...     _float = 0.3
+    ...     _decimal = Decimal("5.0")
     ...     _choice1 = u"two"
     ...     _choice2 = 'two'
     ...     _datetime = datetime.datetime(2009, 1, 2, 15, 10, 5, 1, tz)
@@ -345,6 +348,21 @@ Float
     '0.3'
     >>> marshaler.decode('0.25')
     0.25
+    >>> marshaler.getContentType() is None
+    True
+    >>> marshaler.getCharset('utf-8') is None
+    True
+    >>> marshaler.ascii
+    True
+
+Decimal
+-------
+
+    >>> marshaler = getMultiAdapter((t, ITestContent['_decimal']), IFieldMarshaler)
+    >>> marshaler.marshal()
+    '5.0'
+    >>> marshaler.decode('5.0')
+    Decimal('5.0')
     >>> marshaler.getContentType() is None
     True
     >>> marshaler.getCharset('utf-8') is None

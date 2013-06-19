@@ -4,6 +4,9 @@ Changelog
 1.0.2 (unreleased)
 ------------------
 
+- Marshall collections as ASCII when possible.
+  [davisagli]
+
 - Add support for marshalling decimal fields.
   [davisagli]
 

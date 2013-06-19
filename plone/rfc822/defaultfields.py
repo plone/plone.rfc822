@@ -10,6 +10,7 @@ These field implement IFromUnicode and are supported by a single marshaler:
 * Bool - stores bool (incorrectly omits IFromUnicode specification)
 * Int - stores int, long
 * Float - stores float
+* Decimal - stores Decimal
 * Choice - string/unicode values supported
 
 Do not implement IFromUnicode
@@ -138,7 +139,7 @@ class UnicodeValueFieldMarshaler(UnicodeFieldMarshaler):
     
 class ASCIISafeFieldMarshaler(UnicodeFieldMarshaler):
     """Default marshaler for fields that are ASCII safe, but still support
-    IFromUnicode. This includes Int, Float and Bool.
+    IFromUnicode. This includes Int, Float, Decimal, and Bool.
     """
     
     ascii = True

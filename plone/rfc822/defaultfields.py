@@ -128,14 +128,16 @@ class UnicodeValueFieldMarshaler(UnicodeFieldMarshaler):
     ASCII safe.
     """
     
-    @property
-    def ascii(self):
-        value = self._query()
+    def encode(self, value, charset='utf-8', primary=False):
+        value = super(UnicodeValueFieldMarshaler, self).encode(
+            value, charset, primary)
         if not value:
-            return True
-        if max(map(ord, value)) < 128:
-            return True
-        return False
+            self.ascii = True
+        elif max(map(ord, value)) < 128:
+            self.ascii = True
+        else:
+            self.ascii = False
+        return value
     
 class ASCIISafeFieldMarshaler(UnicodeFieldMarshaler):
     """Default marshaler for fields that are ASCII safe, but still support
@@ -253,13 +255,18 @@ class CollectionMarshaler(BaseFieldMarshaler):
         if valueTypeMarshaler is None:
             return None
         
+        ascii = True
         value_lines = []
         for item in value:
             marshaledValue = valueTypeMarshaler.encode(item, charset=charset, primary=primary)
             if marshaledValue is None:
                 marshaledValue = ''
             value_lines.append(marshaledValue)
+            if not valueTypeMarshaler.ascii:
+                ascii = False
         
+        self.ascii = ascii
+
         return '||'.join(value_lines)
     
     def decode(self, value, message=None, charset='utf-8', contentType=None, primary=False):

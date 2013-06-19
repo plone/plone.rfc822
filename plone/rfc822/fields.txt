@@ -470,7 +470,7 @@ List
     >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii
-    False
+    True
 
 Set
 ---
@@ -485,7 +485,7 @@ Set
     >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii
-    False
+    True
 
 Frozenset
 ---------
@@ -500,4 +500,4 @@ Frozenset
     >>> marshaler.getCharset('utf-8') is None
     True
     >>> marshaler.ascii
-    False
+    True

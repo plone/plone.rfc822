@@ -1,7 +1,14 @@
 Changelog
 =========
 
-1.0.2 (unreleased)
+1.0.3 (2013-08-14)
+------------------
+
+- Branch for Plone 4.2/4.3 compatibility changes.
+  [esteele]
+
+
+1.0.2 (2013-07-28)
 ------------------
 
 - Marshall collections as ASCII when possible.

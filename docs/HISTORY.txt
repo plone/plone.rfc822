@@ -1,10 +1,11 @@
 Changelog
 =========
 
-1.0.3 (unreleased)
-------------------
+1.1 (2013-08-14)
+----------------
 
-- Nothing changed yet.
+- Branch for Plone 4.2/4.3 compatibility changes.
+  [esteele]
 
 
 1.0.2 (2013-07-28)

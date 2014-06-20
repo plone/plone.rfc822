@@ -317,7 +317,7 @@ primary fields, we will get a multipart message with two attachments.
     Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
     <p>My profile</p>
-    --===============...==--
+    --===============...==--...
 
 (Note that we've used ellipses here for the doctest to work with the generated
 boundary string).
@@ -396,7 +396,7 @@ own multipart message. To do that, we would simply use the
     Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
     <p>My profile</p>
-    --===============...==--
+    --===============...==--...
 
 Which approach works best will depend largely on the intended recipient of
 the message.
@@ -582,7 +582,7 @@ In this case, we should get a multipart document with two payloads.
     Content-Transfer-Encoding: base64
     <BLANKLINE>
     PGh0bWw+PGJvZHk+dGVzdDwvYm9keT48L2h0bWw+
-    --===============...==--
+    --===============...==--...
 
 And again, we can reconstruct the object, this time with both fields:
 

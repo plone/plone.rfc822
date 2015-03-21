@@ -4,7 +4,11 @@ Changelog
 1.1.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Update test to reflect the change in the representation of the model namespaces by adding the 18n xml namespace.
+  [sneridagh]
+
+- Make sure the tests do not fail if messages contain a trailing blank line. This fixes test failures on Ubuntu 14.04.
+  [timo]
 
 
 1.1 (2013-08-14)

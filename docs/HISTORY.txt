@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.1.1 (unreleased)
+1.1.1 (2015-03-21)
 ------------------
 
 - Update test to reflect the change in the representation of the model namespaces by adding the 18n xml namespace.

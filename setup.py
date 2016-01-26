@@ -27,6 +27,7 @@ setup(name='plone.rfc822',
       zip_safe=False,
       extras_require={
         'supermodel': ['plone.supermodel'],
+        'test': ['plone.testing'],
       },
       install_requires=[
           'setuptools',

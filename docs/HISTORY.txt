@@ -4,8 +4,10 @@ Changelog
 1.1.2 (unreleased)
 ------------------
 
-- Replace deprecated ``zope.testing.doctest`` import with ``doctest`` module
-  from stdlib.
+- Fix test isolation problem.
+  [thet]
+
+- Replace deprecated ``zope.testing.doctest`` import with ``doctest`` module from stdlib.
   [thet]
 
 

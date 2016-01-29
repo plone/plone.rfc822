@@ -1,23 +1,29 @@
 import unittest
-from zope.testing import doctest
-import zope.component.testing
+import doctest
+from plone.testing import layered
+from plone.testing.zca import UNIT_TESTING
+
+
+DOCFILES = [
+    'message.txt',
+    'fields.txt',
+    'supermodel.txt',
+]
+
+optionflags = doctest.ELLIPSIS
+
 
 def test_suite():
 
-    return unittest.TestSuite((
+    suite = unittest.TestSuite()
+    suite.addTests([
+        layered(
             doctest.DocFileSuite(
-                'message.txt',
-                tearDown=zope.component.testing.tearDown(),
-                optionflags=doctest.ELLIPSIS
+                docfile,
+                optionflags=optionflags,
             ),
-            doctest.DocFileSuite(
-                'fields.txt',
-                tearDown=zope.component.testing.tearDown(),
-                optionflags=doctest.ELLIPSIS
-            ),
-            doctest.DocFileSuite(
-                'supermodel.txt',
-                tearDown=zope.component.testing.tearDown(),
-                optionflags=doctest.ELLIPSIS
-            ),
-        ))
+            layer=UNIT_TESTING
+        )
+        for docfile in DOCFILES
+    ])
+    return suite

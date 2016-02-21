@@ -4,6 +4,8 @@ Changelog
 1.1.2 (unreleased)
 ------------------
 
+Fixes:
+
 - Fix test isolation problem.
   [thet]
 
@@ -56,4 +58,3 @@ Changelog
 ------------------
 
 * Initial release
-

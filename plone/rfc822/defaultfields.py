@@ -36,7 +36,7 @@ import dateutil.parser
 
 from zope.component import queryMultiAdapter
 
-from zope.interface import implements, Interface
+from zope.interface import implementer, Interface
 from zope.component import adapts
 
 from zope.schema.interfaces import IFromUnicode
@@ -48,11 +48,10 @@ from plone.rfc822.interfaces import IFieldMarshaler
 
 _marker = object()
 
+@implementer(IFieldMarshaler)
 class BaseFieldMarshaler(object):
     """Base class for field marshalers
     """
-    
-    implements(IFieldMarshaler)
     
     ascii = False
     

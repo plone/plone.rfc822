@@ -6,18 +6,17 @@ except ImportError:
 
 if HAVE_SUPERMODEL:
     
-    from zope.interface import implements, alsoProvides
+    from zope.interface import implementer, alsoProvides
     from plone.supermodel.utils import ns
     from plone.rfc822.interfaces import IPrimaryField
     
+    @implementer(IFieldMetadataHandler)
     class PrimaryFieldMetadataHandler(object):
         """Define the ``marshal`` namespace.
         
         This lets you write marshal:primary="true" on a field to mark it as
         a primary field.
         """
-        
-        implements(IFieldMetadataHandler)
         
         namespace = "http://namespaces.plone.org/supermodel/marshal"
         prefix = "marshal"

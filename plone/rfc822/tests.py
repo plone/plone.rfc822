@@ -7,9 +7,9 @@ import unittest
 
 
 DOCFILES = [
-    'message.txt',
-    'fields.txt',
-    'supermodel.txt',
+    'message.rst',
+    'fields.rst',
+    'supermodel.rst',
 ]
 
 optionflags = doctest.ELLIPSIS

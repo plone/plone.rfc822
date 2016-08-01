@@ -43,16 +43,16 @@ class IMessageAPI(Interface):
 
         ``context`` is a content object.
 
-        ``fields`` is a sequence of (name, field) pairs for the fields which make
-        up the message. This can be obtained from zope.schema.getFieldsInOrder,
-        for example.
+        ``fields`` is a sequence of (name, field) pairs for the fields which
+        make up the message. This can be obtained from
+        zope.schema.getFieldsInOrder, for example.
 
         ``charset`` is the message charset.
 
         The message body will be constructed from the primary field, i.e. the
         field which is marked with ``IPrimaryField``. If no such field exists,
-        the message will have no body. If multiple fields exist, the message will
-        be a multipart message. Otherwise, it will contain a scalar string
+        the message will have no body. If multiple fields exist, the message
+        will be a multipart message. Otherwise, it will contain a scalar string
         payload.
 
         A field will be ignored if ``(context, field)`` cannot be multi-adapted
@@ -63,12 +63,22 @@ class IMessageAPI(Interface):
         """Render a message to a string
         """
 
-    def initializeObjectFromSchema(context, schema, message, defaultCharset='utf-8'):
+    def initializeObjectFromSchema(
+        context,
+        schema,
+        message,
+        defaultCharset='utf-8'
+    ):
         """Convenience method which calls ``initializeObject()`` with all the
         fields, in order, of the given schema interface
         """
 
-    def initializeObjectFromSchemata(context, schemata, message, defaultCharset='utf-8'):
+    def initializeObjectFromSchemata(
+        context,
+        schemata,
+        message,
+        defaultCharset='utf-8'
+    ):
         """Convenience method which calls ``initializeObject()`` with all the
         fields in order, of all the given schemata (a sequence of schema
         interfaces).
@@ -79,9 +89,9 @@ class IMessageAPI(Interface):
 
         ``context`` is the content object to initialise.
 
-        ``fields`` is a sequence of (name, field) pairs for the fields which make
-        up the message. This can be obtained from zope.schema.getFieldsInOrder,
-        for example.
+        ``fields`` is a sequence of (name, field) pairs for the fields which
+        make up the message. This can be obtained from
+        zope.schema.getFieldsInOrder, for example.
 
         ``message`` is a ``Message`` object.
 
@@ -97,7 +107,7 @@ class IFieldMarshaler(Interface):
     demarshalling from RFC2822 message headers.
 
     This interface deals in unicode strings, which will be encoded/decoded
-    elsewhere. 
+    elsewhere.
     """
 
     ascii = schema.Bool(
@@ -129,7 +139,13 @@ class IFieldMarshaler(Interface):
         skipped.
         """
 
-    def demarshal(value, message=None, charset='utf-8', contentType=None, primary=False):
+    def demarshal(
+        value,
+        message=None,
+        charset='utf-8',
+        contentType=None,
+        primary=False
+    ):
         """Update the value of the adapted field on the adapted context.
 
         Note: It may be necessary to adapt the context to the field's
@@ -163,7 +179,13 @@ class IFieldMarshaler(Interface):
         Return None if the value cannot be encoded.
         """
 
-    def decode(value, message=None, charset='utf-8', contentType=None, primary=False):
+    def decode(
+        value,
+        message=None,
+        charset='utf-8',
+        contentType=None,
+        primary=False
+    ):
         """Like demarshal, but return the value instead of updating the field.
 
         This is only used for collection fields and other situations where
@@ -183,7 +205,7 @@ class IFieldMarshaler(Interface):
     def getCharset(defualt='utf-8'):
         """Return the charset of the field. The value should be appropriate
         for the 'charset' parameter to the Content-Type HTTP header. This is
-        mainly used for marshalling 
+        mainly used for marshalling
 
         The ``default`` parameter contains the message's default charset.
 

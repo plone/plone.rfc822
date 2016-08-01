@@ -10,6 +10,9 @@ New:
 
 Fixes:
 
+- code cleanup: pep8, isort, utf8 headers et al.
+  [jensens]
+
 - Use zope.interface decorator.
   [gforcada]
 

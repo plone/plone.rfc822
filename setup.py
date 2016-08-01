@@ -1,5 +1,9 @@
-from setuptools import setup, find_packages
+# -*- coding: utf-8 -*-
+from setuptools import find_packages
+from setuptools import setup
+
 import os
+
 
 version = '1.1.3.dev0'
 
@@ -33,8 +37,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     extras_require={
-      'supermodel': ['plone.supermodel'],
-      'test': ['plone.testing'],
+        'supermodel': ['plone.supermodel'],
+        'test': ['plone.testing'],
     },
     install_requires=[
         'setuptools',
@@ -45,4 +49,4 @@ setup(
     ],
     entry_points="""
     """,
-    )
+)

@@ -7,9 +7,10 @@ except ImportError:
 
 if HAVE_SUPERMODEL:
 
-    from zope.interface import implementer, alsoProvides
-    from plone.supermodel.utils import ns
     from plone.rfc822.interfaces import IPrimaryField
+    from plone.supermodel.utils import ns
+    from zope.interface import alsoProvides
+    from zope.interface import implementer
 
     @implementer(IFieldMetadataHandler)
     class PrimaryFieldMetadataHandler(object):
@@ -23,8 +24,11 @@ if HAVE_SUPERMODEL:
         prefix = "marshal"
 
         def read(self, fieldNode, schema, field):
-            primary = fieldNode.get(ns('primary',  self.namespace))
-            if primary is not None and primary.lower() in ("true", "on", "yes", "y", "1"):
+            primary = fieldNode.get(ns('primary', self.namespace))
+            if (
+                primary is not None and
+                primary.lower() in ("true", "on", "yes", "y", "1")
+            ):
                 alsoProvides(field, IPrimaryField)
 
         def write(self, fieldNode, schema, field):

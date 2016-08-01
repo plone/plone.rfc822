@@ -143,12 +143,22 @@ def renderMessage(message, mangleFromHeader=False):
     return out.getvalue()
 
 
-def initializeObjectFromSchema(context, schema, message, defaultCharset='utf-8'):
+def initializeObjectFromSchema(
+    context,
+    schema,
+    message,
+    defaultCharset='utf-8'
+):
     initializeObject(context, getFieldsInOrder(
         schema), message, defaultCharset)
 
 
-def initializeObjectFromSchemata(context, schemata, message, defaultCharset='utf-8'):
+def initializeObjectFromSchemata(
+    context,
+    schemata,
+    message,
+    defaultCharset='utf-8'
+):
     """Convenience method which calls ``initializeObject()`` with all the
     fields in order, of all the given schemata (a sequence of schema
     interfaces).
@@ -207,8 +217,13 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
         headerValue = headerValue.replace('\r\n', '\n')
 
         try:
-            marshaler.demarshal(headerValue, message=message,
-                                charset=headerCharset, contentType=contentType, primary=False)
+            marshaler.demarshal(
+                headerValue,
+                message=message,
+                charset=headerCharset,
+                contentType=contentType,
+                primary=False
+            )
         except ValueError, e:
             # interface allows demarshal() to raise ValueError to indicate
             # marshalling failed
@@ -228,7 +243,8 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
     if isinstance(payload, str):
         if len(primary) != 1:
             raise ValueError(
-                "Got a single string payload for message, but no primary fields found for %s" % repr(context))
+                'Got a single string payload for message, but no primary '
+                'fields found for %s' % repr(context))
         else:
             name, field = primary[0]
 
@@ -241,7 +257,12 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                 payloadCharset = message.get_content_charset(charset)
                 try:
                     marshaler.demarshal(
-                        payloadValue, message=message, charset=payloadCharset, contentType=contentType, primary=True)
+                        payloadValue,
+                        message=message,
+                        charset=payloadCharset,
+                        contentType=contentType,
+                        primary=True
+                    )
                 except ValueError, e:
                     # interface allows demarshal() to raise ValueError to
                     # indicate marshalling failed
@@ -251,8 +272,14 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
     # Multiple payloads
     elif isinstance(payload, (list, tuple,)):
         if len(payload) != len(primary):
-            raise ValueError("Got %d payloads for message, but %s primary fields found for %s" % (
-                len(payload), len(primary), repr(context),))
+            raise ValueError(
+                'Got %d payloads for message, but %s primary fields '
+                'found for %s' % (
+                    len(payload),
+                    len(primary),
+                    repr(context),
+                )
+            )
         else:
             for idx, msg in enumerate(payload):
                 name, field = primary[idx]
@@ -268,15 +295,24 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                 marshaler = queryMultiAdapter(
                     (context, field,), IFieldMarshaler)
                 if marshaler is None:
-                    LOG.debug("No marshaler found for primary field %s of %s" % (
-                        name, repr(context),))
+                    LOG.debug(
+                        'No marshaler found for primary field %s of %s' % (
+                            name,
+                            repr(context),
+                        )
+                    )
                     continue
 
                 payloadValue = msg.get_payload(decode=True)
                 payloadCharset = msg.get_content_charset(charset)
                 try:
                     marshaler.demarshal(
-                        payloadValue, message=msg, charset=payloadCharset, contentType=contentType, primary=True)
+                        payloadValue,
+                        message=msg,
+                        charset=payloadCharset,
+                        contentType=contentType,
+                        primary=True
+                    )
                 except ValueError, e:
                     # interface allows demarshal() to raise ValueError to
                     # indicate marshalling failed

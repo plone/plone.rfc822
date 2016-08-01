@@ -31,20 +31,21 @@ Unsupported by default:
 * Dict - stores a dict
 """
 
+from plone.rfc822.interfaces import IFieldMarshaler
+from zope.component import adapts
+from zope.component import queryMultiAdapter
+from zope.interface import implementer
+from zope.interface import Interface
+from zope.schema.interfaces import IBytes
+from zope.schema.interfaces import ICollection
+from zope.schema.interfaces import IDate
+from zope.schema.interfaces import IDatetime
+from zope.schema.interfaces import IFromUnicode
+from zope.schema.interfaces import ITimedelta
+
 import datetime
 import dateutil.parser
 
-from zope.component import queryMultiAdapter
-
-from zope.interface import implementer, Interface
-from zope.component import adapts
-
-from zope.schema.interfaces import IFromUnicode
-from zope.schema.interfaces import IBytes
-from zope.schema.interfaces import IDatetime, IDate, ITimedelta
-from zope.schema.interfaces import ICollection
-
-from plone.rfc822.interfaces import IFieldMarshaler
 
 _marker = object()
 

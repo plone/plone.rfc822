@@ -5,19 +5,19 @@ import these from plone.rfc822 directly, not from this module.
 See interfaces.py for details.
 """
 
-import logging
 from cStringIO import StringIO
-
-# Note: We use capitalised module names to be compatible with Python 2.4
-from email.Message import Message 
-from email.Header import Header, decode_header
 from email.Generator import Generator
-
+from email.Header import decode_header
+from email.Header import Header
+# Note: We use capitalised module names to be compatible with Python 2.4
+from email.Message import Message
+from plone.rfc822.interfaces import IFieldMarshaler
+from plone.rfc822.interfaces import IPrimaryField
 from zope.component import queryMultiAdapter
 from zope.schema import getFieldsInOrder
 
-from plone.rfc822.interfaces import IFieldMarshaler
-from plone.rfc822.interfaces import IPrimaryField
+import logging
+
 
 LOG = logging.getLogger('plone.rfc822')
 

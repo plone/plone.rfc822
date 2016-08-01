@@ -14,7 +14,7 @@ setup(
     long_description=(
         open("README.rst").read() + "\n" +
         open("CHANGES.rst").read() +
-        open(os.path.join("plone", "rfc822", "message.txt")).read()),
+        open(os.path.join("plone", "rfc822", "message.rst")).read()),
     # Get more strings from
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Implementation of IMessageAPI methods.
 
 import these from plone.rfc822 directly, not from this module.

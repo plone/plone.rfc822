@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from plone.testing import layered
 from plone.testing.zca import UNIT_TESTING
 

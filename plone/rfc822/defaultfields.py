@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Default field marshalers for the fields in zope.schema.
 
 Note that none of the marshalers will return a value for getContentType(),

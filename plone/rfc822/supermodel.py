@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 try:
     from plone.supermodel.interfaces import IFieldMetadataHandler
     HAVE_SUPERMODEL = True

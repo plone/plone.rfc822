@@ -1,5 +1,9 @@
-from setuptools import setup, find_packages
+# -*- coding: utf-8 -*-
+from setuptools import find_packages
+from setuptools import setup
+
 import os
+
 
 version = '1.1.3.dev0'
 
@@ -10,7 +14,7 @@ setup(
     long_description=(
         open("README.rst").read() + "\n" +
         open("CHANGES.rst").read() +
-        open(os.path.join("plone", "rfc822", "message.txt")).read()),
+        open(os.path.join("plone", "rfc822", "message.rst")).read()),
     # Get more strings from
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
@@ -33,8 +37,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     extras_require={
-      'supermodel': ['plone.supermodel'],
-      'test': ['plone.testing'],
+        'supermodel': ['plone.supermodel'],
+        'test': ['plone.testing'],
     },
     install_requires=[
         'setuptools',
@@ -45,4 +49,4 @@ setup(
     ],
     entry_points="""
     """,
-    )
+)

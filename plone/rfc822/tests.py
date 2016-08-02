@@ -1,13 +1,15 @@
-import unittest
-import doctest
+# -*- coding: utf-8 -*-
 from plone.testing import layered
 from plone.testing.zca import UNIT_TESTING
 
+import doctest
+import unittest
+
 
 DOCFILES = [
-    'message.txt',
-    'fields.txt',
-    'supermodel.txt',
+    'message.rst',
+    'fields.rst',
+    'supermodel.rst',
 ]
 
 optionflags = doctest.ELLIPSIS

@@ -4,10 +4,6 @@ Changelog
 1.1.3 (unreleased)
 ------------------
 
-New:
-
-- *add item here*
-
 Fixes:
 
 - code cleanup: pep8, isort, utf8 headers et al.

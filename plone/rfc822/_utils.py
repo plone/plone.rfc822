@@ -6,12 +6,14 @@ import these from plone.rfc822 directly, not from this module.
 See interfaces.py for details.
 """
 
-from cStringIO import StringIO
-from email.Generator import Generator
-from email.Header import decode_header
-from email.Header import Header
-# Note: We use capitalised module names to be compatible with Python 2.4
-from email.Message import Message
+try:
+    from io import StringIO
+except ImportError:
+    from cStringIO import StringIO
+from email.generator import Generator
+from email.header import decode_header
+from email.header import Header
+from email.message import Message
 from plone.rfc822.interfaces import IFieldMarshaler
 from plone.rfc822.interfaces import IPrimaryField
 from zope.component import queryMultiAdapter
@@ -54,7 +56,7 @@ def constructMessage(context, fields, charset='utf-8'):
 
         try:
             value = marshaler.marshal(charset, primary=False)
-        except ValueError, e:
+        except ValueError as e:
             LOG.debug("Marshaling of %s for %s failed: %s" %
                       (name, repr(context), str(e)))
             continue
@@ -224,7 +226,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                 contentType=contentType,
                 primary=False
             )
-        except ValueError, e:
+        except ValueError as e:
             # interface allows demarshal() to raise ValueError to indicate
             # marshalling failed
             LOG.debug("Demarshalling of %s for %s failed: %s" %
@@ -263,7 +265,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                         contentType=contentType,
                         primary=True
                     )
-                except ValueError, e:
+                except ValueError as e:
                     # interface allows demarshal() to raise ValueError to
                     # indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" %
@@ -313,7 +315,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                         contentType=contentType,
                         primary=True
                     )
-                except ValueError, e:
+                except ValueError as e:
                     # interface allows demarshal() to raise ValueError to
                     # indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" %

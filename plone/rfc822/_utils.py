@@ -7,9 +7,9 @@ See interfaces.py for details.
 """
 
 try:
-    from io import StringIO
-except ImportError:
     from cStringIO import StringIO
+except ImportError:
+    from io import StringIO
 from email.generator import Generator
 from email.header import decode_header
 from email.header import Header

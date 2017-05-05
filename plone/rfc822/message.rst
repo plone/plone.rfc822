@@ -553,7 +553,7 @@ We can also reconstruct the object from this message.
     >>> newFileContent = FileContent()
     >>> initializeObjectFromSchema(newFileContent, IFileContent, inputMessage)
 
-    >>> newFileContent.file1.data.decode('latin1')
+    >>> newFileContent.file1.data
     'dummy file'
     >>> newFileContent.file1.contentType
     'text/plain'
@@ -595,14 +595,14 @@ And again, we can reconstruct the object, this time with both fields:
     >>> newFileContent = FileContent()
     >>> initializeObjectFromSchema(newFileContent, IFileContent, inputMessage)
 
-    >>> newFileContent.file1.data.decode('latin1')
+    >>> newFileContent.file1.data
     'dummy file'
     >>> newFileContent.file1.contentType
     'text/plain'
     >>> newFileContent.file1.filename
     'dummy1.txt'
 
-    >>> newFileContent.file2.data.decode('latin1')
+    >>> newFileContent.file2.data
     '<html><body>test</body></html>'
     >>> newFileContent.file2.contentType
     'text/html'

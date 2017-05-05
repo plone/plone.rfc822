@@ -120,7 +120,7 @@ Text
 ----
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_text']), IFieldMarshaler)
-    >>> marshaler.marshal().decode('utf-8')
+    >>> marshaler.marshal()
     'text\xc3\x98'
     >>> marshaler.decode('text\xc3\x98')
     u'text\xd8'

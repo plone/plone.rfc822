@@ -15,7 +15,6 @@ from email.header import decode_header
 from email.header import Header
 from email.message import Message
 from plone.rfc822 import PY3
-from plone.rfc822 import binary_type
 from plone.rfc822.interfaces import IFieldMarshaler
 from plone.rfc822.interfaces import IPrimaryField
 from zope.component import queryMultiAdapter

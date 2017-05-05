@@ -142,7 +142,7 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
     ):
         unicodeValue = value.decode(charset)
         try:
-            return self.field.fromUnicode(value)
+            return self.field.fromUnicode(unicodeValue)
         except Exception as e:
             raise ValueError(e)
 

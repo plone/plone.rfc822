@@ -11,13 +11,17 @@ First, let's load this package's ZCML so that we can run the tests:
     >>> configuration = """\
     ... <configure xmlns="http://namespaces.zope.org/zope">
     ...
-    ...     <include package="Products.Five" file="configure.zcml" />
+    ...     <include package="zope.component" file="meta.zcml" />
     ...     <include package="plone.supermodel" />
     ...     <include package="plone.rfc822" />
     ...
     ... </configure>
     ... """
-    >>> from StringIO import StringIO
+    >>> from plone.rfc822 import PY3
+    >>> if PY3:
+    ...     from io import StringIO
+    ... else:
+    ...     from StringIO import StringIO
     >>> from zope.configuration import xmlconfig
     >>> xmlconfig.xmlconfig(StringIO(configuration))
 
@@ -63,7 +67,7 @@ on which it is marked:
     >>> alsoProvides(ITestSchema['body'], IPrimaryField)
 
     >>> from plone.supermodel import serializeSchema
-    >>> print serializeSchema(ITestSchema) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(serializeSchema(ITestSchema).decode('utf-8'))  # doctest: +NORMALIZE_WHITESPACE
     <model xmlns:i18n="http://xml.zope.org/namespaces/i18n" xmlns:marshal="http://namespaces.plone.org/supermodel/marshal" xmlns="http://namespaces.plone.org/supermodel/schema">
       <schema based-on="zope.interface.Interface">
         <field name="title" type="zope.schema.TextLine">

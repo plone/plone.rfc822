@@ -117,7 +117,7 @@ class BaseFieldMarshaler(object):
     def _set(self, value):
         try:
             self.field.set(self.instance, value)
-        except TypeError, e:
+        except TypeError as e:
             raise ValueError(e)
 
 
@@ -225,7 +225,7 @@ class DatetimeMarshaler(BaseFieldMarshaler):
         unicodeValue = value.decode(charset)
         try:
             return dateutil.parser.parse(unicodeValue)
-        except Exception, e:
+        except Exception as e:
             raise ValueError(e)
 
 
@@ -257,7 +257,7 @@ class DateMarshaler(BaseFieldMarshaler):
         unicodeValue = value.decode(charset)
         try:
             return dateutil.parser.parse(unicodeValue).date()
-        except Exception, e:
+        except Exception as e:
             raise ValueError(e)
 
 
@@ -292,7 +292,7 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
         try:
             days, seconds, microseconds = [int(v) for v in value.split(":")]
             return datetime.timedelta(days, seconds, microseconds)
-        except Exception, e:
+        except Exception as e:
             raise ValueError(e)
 
 

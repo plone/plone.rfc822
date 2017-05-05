@@ -18,7 +18,11 @@ First, we load the package's configuration:
     ... </configure>
     ... """
 
-    >>> from StringIO import StringIO
+    >>> from plone.rfc822 import PY3
+    >>> if PY3:
+    ...     from io import StringIO
+    ... else:
+    ...     from StringIO import StringIO
     >>> from zope.configuration import xmlconfig
     >>> xmlconfig.xmlconfig(StringIO(configuration))
 
@@ -60,11 +64,14 @@ we support.
 
 This interface is implemented by a the following class:
 
-    >>> from zope.interface import implements
+    >>> from zope.interface import implementer
     >>> import datetime
     >>> from decimal import Decimal
-    >>> class TestContent(object):
-    ...     implements(ITestContent)
+    >>> import sys
+    >>> if sys.version_info > (3,):
+    ...     long = int
+    >>> @implementer(ITestContent)
+    ... class TestContent(object):
     ...     _text = u"text\xd8"
     ...     _text2 = u"text" # ascii safe
     ...     _textLine = u"textline\xd8"
@@ -79,7 +86,7 @@ This interface is implemented by a the following class:
     ...     _id = 'some.id'
     ...     _dottedName = 'dotted.name'
     ...     _bool = True
-    ...     _int = -10l
+    ...     _int = long(-10)
     ...     _float = 0.3
     ...     _decimal = Decimal("5.0")
     ...     _choice1 = u"two"
@@ -113,7 +120,7 @@ Text
 ----
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_text']), IFieldMarshaler)
-    >>> marshaler.marshal()
+    >>> marshaler.marshal().decode('utf-8')
     'text\xc3\x98'
     >>> marshaler.decode('text\xc3\x98')
     u'text\xd8'

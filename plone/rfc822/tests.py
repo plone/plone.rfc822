@@ -14,7 +14,7 @@ DOCFILES = [
     'supermodel.rst',
 ]
 
-optionflags = doctest.ELLIPSIS | doctest.REPORT_UDIFF | doctest.NORMALIZE_WHITESPACE
+optionflags = doctest.ELLIPSIS | doctest.REPORT_UDIFF | doctest.NORMALIZE_WHITESPACE  # noqa: E501
 
 
 class Py23DocChecker(doctest.OutputChecker):

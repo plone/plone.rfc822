@@ -9,12 +9,12 @@ First, we load the package's configuration:
     ... <configure
     ...      xmlns="http://namespaces.zope.org/zope"
     ...      i18n_domain="plone.rfc822.tests">
-    ...      
+    ...
     ...     <include package="zope.component" file="meta.zcml" />
     ...     <include package="zope.annotation" />
-    ...     
+    ...
     ...     <include package="plone.rfc822" />
-    ...     
+    ...
     ... </configure>
     ... """
 
@@ -107,7 +107,7 @@ extraction methods.
     >>> from zope.component import getMultiAdapter
     >>> from plone.rfc822.interfaces import IFieldMarshaler
 
-Notes: 
+Notes:
 
 * Unicode \xd8 (capital letter O with stroke) is \xc3\x98 in UTF-8.
 * None of the default marshalers support getContentType(), i.e. they all
@@ -391,7 +391,7 @@ Choice
     'utf-8'
     >>> marshaler.ascii
     True
-    
+
     >>> marshaler = getMultiAdapter((t, ITestContent['_choice2']), IFieldMarshaler)
     >>> marshaler.marshal()
     'two'

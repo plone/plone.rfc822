@@ -142,8 +142,8 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
     ):
         unicodeValue = value.decode(charset)
         try:
-            return self.field.fromUnicode(unicodeValue)
-        except Exception, e:
+            return self.field.fromUnicode(value)
+        except Exception as e:
             raise ValueError(e)
 
     def getCharset(self, default='utf-8'):

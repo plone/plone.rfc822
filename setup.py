@@ -5,7 +5,7 @@ from setuptools import setup
 import os
 
 
-version = '1.1.4.dev0'
+version = '2.0.0.dev0'
 
 setup(
     name='plone.rfc822',
@@ -19,11 +19,9 @@ setup(
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         "Framework :: Plone",
-        "Framework :: Plone :: 4.3",
         "Framework :: Plone :: 5.0",
         "Framework :: Plone :: 5.1",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: BSD License",
@@ -43,6 +41,7 @@ setup(
     },
     install_requires=[
         'setuptools',
+        'six',
         'zope.schema',
         'zope.component',
         'zope.interface',

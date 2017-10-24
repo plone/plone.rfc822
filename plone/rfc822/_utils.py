@@ -6,7 +6,6 @@ import these from plone.rfc822 directly, not from this module.
 See interfaces.py for details.
 """
 
-from cStringIO import StringIO
 from email.Generator import Generator
 from email.Header import decode_header
 from email.Header import Header
@@ -14,6 +13,7 @@ from email.Header import Header
 from email.Message import Message
 from plone.rfc822.interfaces import IFieldMarshaler
 from plone.rfc822.interfaces import IPrimaryField
+from six.moves import cStringIO as StringIO
 from zope.component import queryMultiAdapter
 from zope.schema import getFieldsInOrder
 
@@ -54,7 +54,7 @@ def constructMessage(context, fields, charset='utf-8'):
 
         try:
             value = marshaler.marshal(charset, primary=False)
-        except ValueError, e:
+        except ValueError as e:
             LOG.debug("Marshaling of %s for %s failed: %s" %
                       (name, repr(context), str(e)))
             continue
@@ -224,7 +224,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                 contentType=contentType,
                 primary=False
             )
-        except ValueError, e:
+        except ValueError as e:
             # interface allows demarshal() to raise ValueError to indicate
             # marshalling failed
             LOG.debug("Demarshalling of %s for %s failed: %s" %
@@ -263,7 +263,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                         contentType=contentType,
                         primary=True
                     )
-                except ValueError, e:
+                except ValueError as e:
                     # interface allows demarshal() to raise ValueError to
                     # indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" %
@@ -313,7 +313,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                         contentType=contentType,
                         primary=True
                     )
-                except ValueError, e:
+                except ValueError as e:
                     # interface allows demarshal() to raise ValueError to
                     # indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" %

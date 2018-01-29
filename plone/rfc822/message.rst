@@ -8,7 +8,7 @@ based on its headers and body payload.
 Before we begin, let's load the default field marshalers and configure
 annotations, which we will use later in this test.
 
-    >>> configuration = """\
+    >>> configuration = u"""\
     ... <configure
     ...      xmlns="http://namespaces.zope.org/zope"
     ...      i18n_domain="plone.rfc822.tests">
@@ -21,11 +21,7 @@ annotations, which we will use later in this test.
     ... </configure>
     ... """
 
-    >>> from plone.rfc822 import PY3
-    >>> if PY3:
-    ...     from io import StringIO
-    ... else:
-    ...     from StringIO import StringIO
+    >>> from six import StringIO
     >>> from zope.configuration import xmlconfig
     >>> xmlconfig.xmlconfig(StringIO(configuration))
 

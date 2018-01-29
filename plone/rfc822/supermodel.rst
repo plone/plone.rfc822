@@ -8,7 +8,7 @@ This handler is installed so long as ``plone.supermodel`` is installed.
 
 First, let's load this package's ZCML so that we can run the tests:
 
-    >>> configuration = """\
+    >>> configuration = u"""\
     ... <configure xmlns="http://namespaces.zope.org/zope">
     ...
     ...     <include package="zope.component" file="meta.zcml" />
@@ -17,17 +17,13 @@ First, let's load this package's ZCML so that we can run the tests:
     ...
     ... </configure>
     ... """
-    >>> from plone.rfc822 import PY3
-    >>> if PY3:
-    ...     from io import StringIO
-    ... else:
-    ...     from StringIO import StringIO
+    >>> from six import StringIO
     >>> from zope.configuration import xmlconfig
     >>> xmlconfig.xmlconfig(StringIO(configuration))
 
 Next, let's define a sample model that exercises the 'marshal' attribute.
 
-    >>> schema = """\
+    >>> schema = b"""\
     ... <?xml version="1.0" encoding="UTF-8"?>
     ... <model xmlns="http://namespaces.plone.org/supermodel/schema"
     ...        xmlns:marshal="http://namespaces.plone.org/supermodel/marshal">

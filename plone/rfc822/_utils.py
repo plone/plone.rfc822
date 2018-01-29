@@ -6,21 +6,18 @@ import these from plone.rfc822 directly, not from this module.
 See interfaces.py for details.
 """
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
 from email.generator import Generator
 from email.header import decode_header
 from email.header import Header
 from email.message import Message
 from plone.rfc822.interfaces import IFieldMarshaler
 from plone.rfc822.interfaces import IPrimaryField
+from six import StringIO
 from zope.component import queryMultiAdapter
 from zope.schema import getFieldsInOrder
 
 import logging
-
+import six
 
 LOG = logging.getLogger('plone.rfc822')
 
@@ -63,7 +60,7 @@ def constructMessage(context, fields, charset='utf-8'):
 
         if value is None:
             value = ''
-        elif not isinstance(value, str):
+        elif not isinstance(value, six.binary_type):
             raise ValueError(
                 "Marshaler for field %s did not return a string" % name)
 

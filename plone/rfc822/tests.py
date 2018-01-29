@@ -5,7 +5,7 @@ from plone.testing.zca import UNIT_TESTING
 import doctest
 import unittest
 import re
-import sys
+import six
 
 
 DOCFILES = [
@@ -14,12 +14,15 @@ DOCFILES = [
     'supermodel.rst',
 ]
 
-optionflags = doctest.ELLIPSIS | doctest.REPORT_UDIFF | doctest.NORMALIZE_WHITESPACE  # noqa: E501
+optionflags = doctest.ELLIPSIS | \
+    doctest.REPORT_UDIFF | \
+    doctest.NORMALIZE_WHITESPACE | \
+    doctest.REPORT_ONLY_FIRST_FAILURE
 
 
 class Py23DocChecker(doctest.OutputChecker):
     def check_output(self, want, got, optionflags):
-        if sys.version_info[0] > 2:
+        if not six.PY2:
             want = re.sub("u'(.*?)'", "'\\1'", want)
             want = re.sub('u"(.*?)"', '"\\1"', want)
         return doctest.OutputChecker.check_output(self, want, got, optionflags)

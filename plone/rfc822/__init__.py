@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-import sys
-PY3 = sys.version_info[0] == 3
-
 from plone.rfc822._utils import constructMessage
 from plone.rfc822._utils import constructMessageFromSchema
 from plone.rfc822._utils import constructMessageFromSchemata

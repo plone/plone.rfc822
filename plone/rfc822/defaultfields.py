@@ -46,6 +46,7 @@ from zope.schema.interfaces import ITimedelta
 
 import datetime
 import dateutil.parser
+import six
 
 
 _marker = object()
@@ -117,7 +118,7 @@ class BaseFieldMarshaler(object):
     def _set(self, value):
         try:
             self.field.set(self.instance, value)
-        except TypeError, e:
+        except TypeError as e:
             raise ValueError(e)
 
 
@@ -130,7 +131,7 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
     def encode(self, value, charset='utf-8', primary=False):
         if value is None:
             return None
-        return unicode(value).encode(charset)
+        return six.text_type(value).encode(charset)
 
     def decode(
         self,
@@ -143,7 +144,7 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
         unicodeValue = value.decode(charset)
         try:
             return self.field.fromUnicode(unicodeValue)
-        except Exception, e:
+        except Exception as e:
             raise ValueError(e)
 
     def getCharset(self, default='utf-8'):
@@ -225,7 +226,7 @@ class DatetimeMarshaler(BaseFieldMarshaler):
         unicodeValue = value.decode(charset)
         try:
             return dateutil.parser.parse(unicodeValue)
-        except Exception, e:
+        except Exception as e:
             raise ValueError(e)
 
 
@@ -257,7 +258,7 @@ class DateMarshaler(BaseFieldMarshaler):
         unicodeValue = value.decode(charset)
         try:
             return dateutil.parser.parse(unicodeValue).date()
-        except Exception, e:
+        except Exception as e:
             raise ValueError(e)
 
 
@@ -292,7 +293,7 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
         try:
             days, seconds, microseconds = [int(v) for v in value.split(":")]
             return datetime.timedelta(days, seconds, microseconds)
-        except Exception, e:
+        except Exception as e:
             raise ValueError(e)
 
 

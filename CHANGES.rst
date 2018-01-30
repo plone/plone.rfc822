@@ -1,12 +1,13 @@
 Changelog
 =========
 
-1.1.4 (unreleased)
+2.0.0 (unreleased)
 ------------------
 
 Breaking changes:
 
-- *add item here*
+- Drop Python 2.6 support.
+  [ale-rt]
 
 New features:
 
@@ -14,7 +15,8 @@ New features:
 
 Bug fixes:
 
-- *add item here*
+- Python3 compatibility with sixer.
+  [ale-rt]
 
 
 1.1.3 (2016-08-09)

@@ -3,6 +3,8 @@ from zope import schema
 from zope.interface import Attribute
 from zope.interface import Interface
 
+import six
+
 
 class IPrimaryField(Interface):
     """Marker interface for the primary field in a schema

@@ -73,12 +73,12 @@ class BaseFieldMarshaler(object):
             self.encode(value, charset, primary)
 
     def demarshal(
-            self,
-            value,
-            message=None,
-            charset='utf-8',
-            contentType=None,
-            primary=False
+        self,
+        value,
+        message=None,
+        charset='utf-8',
+        contentType=None,
+        primary=False
     ):
         fieldValue = self.field.missing_value
         if value:
@@ -90,12 +90,12 @@ class BaseFieldMarshaler(object):
         return None
 
     def decode(
-            self,
-            value,
-            message=None,
-            charset='utf-8',
-            contentType=None,
-            primary=False
+        self,
+        value,
+        message=None,
+        charset='utf-8',
+        contentType=None,
+        primary=False
     ):
         raise ValueError("Demarshalling not implemented for %s" %
                          repr(self.field))
@@ -128,15 +128,20 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
     adapts(Interface, IFromUnicode)
 
     def encode(self, value, charset='utf-8', primary=False):
-        return None if value is None else six.text_type(value).encode(charset)
+        if value is None:
+            return
+        if isinstance(value, six.binary_type):
+            # value already encoded
+            return value
+        return six.text_type(value).encode(charset)
 
     def decode(
-            self,
-            value,
-            message=None,
-            charset='utf-8',
-            contentType=None,
-            primary=False
+        self,
+        value,
+        message=None,
+        charset='utf-8',
+        contentType=None,
+        primary=False
     ):
         unicodeValue = value.decode(charset)
         try:
@@ -156,8 +161,7 @@ class UnicodeValueFieldMarshaler(UnicodeFieldMarshaler):
     def encode(self, value, charset='utf-8', primary=False):
         encoded = super(UnicodeValueFieldMarshaler, self).encode(
             value, charset, primary)
-        # if not encoded or max(map(ord, str(encoded))) > 127:
-        if not encoded or max(map(ord, encoded)) > 127:
+        if not encoded or max(six.iterbytes(encoded)) < 128:
             self.ascii = True
         else:
             self.ascii = False
@@ -188,12 +192,12 @@ class BytesFieldMarshaler(BaseFieldMarshaler):
         return value
 
     def decode(
-            self,
-            value,
-            message=None,
-            charset='utf-8',
-            contentType=None,
-            primary=False
+        self,
+        value,
+        message=None,
+        charset='utf-8',
+        contentType=None,
+        primary=False
     ):
         return value
 
@@ -212,12 +216,12 @@ class DatetimeMarshaler(BaseFieldMarshaler):
         return value.isoformat()
 
     def decode(
-            self,
-            value,
-            message=None,
-            charset='utf-8',
-            contentType=None,
-            primary=False
+        self,
+        value,
+        message=None,
+        charset='utf-8',
+        contentType=None,
+        primary=False
     ):
         unicodeValue = value.decode(charset)
         try:
@@ -244,12 +248,12 @@ class DateMarshaler(BaseFieldMarshaler):
         return value.isoformat()
 
     def decode(
-            self,
-            value,
-            message=None,
-            charset='utf-8',
-            contentType=None,
-            primary=False
+        self,
+        value,
+        message=None,
+        charset='utf-8',
+        contentType=None,
+        primary=False
     ):
         unicodeValue = value.decode(charset)
         try:
@@ -276,16 +280,13 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
         return "%d:%d:%d" % (value.days, value.seconds, value.microseconds)
 
     def decode(
-            self,
-            value,
-            message=None,
-            charset='utf-8',
-            contentType=None,
-            primary=False
+        self,
+        value,
+        message=None,
+        charset='utf-8',
+        contentType=None,
+        primary=False
     ):
-        # this value is never used, should it be used later in the list
-        # comprehension?
-        unicodeValue = value.decode(charset)
         try:
             days, seconds, microseconds = [int(v) for v in value.split(":")]
             return datetime.timedelta(days, seconds, microseconds)
@@ -333,12 +334,12 @@ class CollectionMarshaler(BaseFieldMarshaler):
         return '||'.join(value_lines)
 
     def decode(
-            self,
-            value,
-            message=None,
-            charset='utf-8',
-            contentType=None,
-            primary=False
+        self,
+        value,
+        message=None,
+        charset='utf-8',
+        contentType=None,
+        primary=False
     ):
         valueTypeMarshaler = queryMultiAdapter(
             (self.context, self.field.value_type,), IFieldMarshaler)

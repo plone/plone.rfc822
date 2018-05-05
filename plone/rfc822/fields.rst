@@ -18,9 +18,9 @@ First, we load the package's configuration:
     ... </configure>
     ... """
 
-    >>> from six import StringIO
+    >>> from io import BytesIO
     >>> from zope.configuration import xmlconfig
-    >>> xmlconfig.xmlconfig(StringIO(configuration))
+    >>> xmlconfig.xmlconfig(BytesIO(configuration))
 
 Next, we'll create an interface which contains an instance of every field
 we support.
@@ -115,7 +115,7 @@ Text
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_text']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'text\xc3\x98'
+    b'text\xc3\x98'
     >>> marshaler.decode(b'text\xc3\x98')
     u'text\xd8'
     >>> marshaler.getContentType() is None
@@ -130,7 +130,7 @@ if the field value is within the ascii range.
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_text2']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'text'
+    b'text'
     >>> marshaler.decode(b'text\xc3\x98')
     u'text\xd8'
     >>> marshaler.getContentType() is None
@@ -145,7 +145,7 @@ TextLine
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_textLine']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'textline\xc3\x98'
+    b'textline\xc3\x98'
     >>> marshaler.decode(b'textline\xc3\x98')
     u'textline\xd8'
     >>> marshaler.getContentType() is None
@@ -160,7 +160,7 @@ if the field value is within the ascii range.
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_textLine2']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'textline'
+    b'textline'
     >>> marshaler.decode(b'textline\xc3\x98')
     u'textline\xd8'
     >>> marshaler.getContentType() is None
@@ -175,7 +175,7 @@ Password
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_password']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'password\xc3\x98'
+    b'password\xc3\x98'
     >>> marshaler.decode(b'password\xc3\x98')
     u'password\xd8'
     >>> marshaler.getContentType() is None
@@ -190,7 +190,7 @@ if the field value is within the ascii range.
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_password2']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'password'
+    b'password'
     >>> marshaler.decode(b'password\xc3\x98')
     u'password\xd8'
     >>> marshaler.getContentType() is None
@@ -207,7 +207,7 @@ Bytes
     >>> marshaler.marshal()
     'bytes'
     >>> marshaler.decode(b'bytes')
-    'bytes'
+    b'bytes'
     >>> marshaler.getContentType() is None
     True
     >>> marshaler.getCharset('utf-8') is None
@@ -222,7 +222,7 @@ BytesLine
     >>> marshaler.marshal()
     'bytesline'
     >>> marshaler.decode(b'bytesline')
-    'bytesline'
+    b'bytesline'
     >>> marshaler.getContentType() is None
     True
     >>> marshaler.getCharset('utf-8') is None
@@ -235,7 +235,7 @@ ASCII
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_ascii']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'ascii'
+    b'ascii'
     >>> marshaler.decode(b'ascii')
     'ascii'
     >>> marshaler.getContentType() is None
@@ -252,7 +252,7 @@ ASCIILine
     >>> marshaler.marshal()
     'asciiline'
     >>> marshaler.decode(b'asciiline')
-    'asciiline'
+    b'asciiline'
     >>> marshaler.getContentType() is None
     True
     >>> marshaler.getCharset('utf-8') is None

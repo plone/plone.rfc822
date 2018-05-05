@@ -8,7 +8,7 @@ This handler is installed so long as ``plone.supermodel`` is installed.
 
 First, let's load this package's ZCML so that we can run the tests:
 
-    >>> configuration = u"""\
+    >>> configuration = b"""\
     ... <configure xmlns="http://namespaces.zope.org/zope">
     ...
     ...     <include package="zope.component" file="meta.zcml" />
@@ -17,13 +17,13 @@ First, let's load this package's ZCML so that we can run the tests:
     ...
     ... </configure>
     ... """
-    >>> from six import StringIO
+    >>> from io import BytesIO
     >>> from zope.configuration import xmlconfig
-    >>> xmlconfig.xmlconfig(StringIO(configuration))
+    >>> xmlconfig.xmlconfig(BytesIO(configuration))
 
 Next, let's define a sample model that exercises the 'marshal' attribute.
 
-    >>> schema = b"""\
+    >>> schema = """\
     ... <?xml version="1.0" encoding="UTF-8"?>
     ... <model xmlns="http://namespaces.plone.org/supermodel/schema"
     ...        xmlns:marshal="http://namespaces.plone.org/supermodel/marshal">
@@ -63,7 +63,7 @@ on which it is marked:
     >>> alsoProvides(ITestSchema['body'], IPrimaryField)
 
     >>> from plone.supermodel import serializeSchema
-    >>> print(serializeSchema(ITestSchema).decode('utf-8'))  # doctest: +NORMALIZE_WHITESPACE
+    >>> print(serializeSchema(ITestSchema))  # doctest: +NORMALIZE_WHITESPACE
     <model xmlns:i18n="http://xml.zope.org/namespaces/i18n" xmlns:marshal="http://namespaces.plone.org/supermodel/marshal" xmlns="http://namespaces.plone.org/supermodel/schema">
       <schema based-on="zope.interface.Interface">
         <field name="title" type="zope.schema.TextLine">

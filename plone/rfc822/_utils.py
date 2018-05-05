@@ -10,14 +10,15 @@ from email.generator import Generator
 from email.header import decode_header
 from email.header import Header
 from email.message import Message
+from io import BytesIO
 from plone.rfc822.interfaces import IFieldMarshaler
 from plone.rfc822.interfaces import IPrimaryField
-from six import StringIO
 from zope.component import queryMultiAdapter
 from zope.schema import getFieldsInOrder
 
 import logging
 import six
+
 
 LOG = logging.getLogger('plone.rfc822')
 
@@ -59,12 +60,12 @@ def constructMessage(context, fields, charset='utf-8'):
             continue
 
         if value is None:
-            value = ''
+            value = b''
         elif not isinstance(value, six.binary_type):
             raise ValueError(
-                "Marshaler for field %s did not return a string" % name)
+                "Marshaler for field %s did not return bytes" % name)
 
-        if marshaler.ascii and '\n' not in value:
+        if marshaler.ascii and b'\n' not in value:
             msg[name] = value
         else:
             msg[name] = Header(value, charset)
@@ -136,7 +137,7 @@ def constructMessage(context, fields, charset='utf-8'):
 
 
 def renderMessage(message, mangleFromHeader=False):
-    out = StringIO()
+    out = BytesIO()
     generator = Generator(out, mangle_from_=mangleFromHeader)
     generator.flatten(message)
     return out.getvalue()

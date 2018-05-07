@@ -8,20 +8,20 @@ based on its headers and body payload.
 Before we begin, let's load the default field marshalers and configure
 annotations, which we will use later in this test.
 
-    >>> configuration = """\
+    >>> configuration = u"""\
     ... <configure
     ...      xmlns="http://namespaces.zope.org/zope"
     ...      i18n_domain="plone.rfc822.tests">
-    ...      
+    ...
     ...     <include package="zope.component" file="meta.zcml" />
     ...     <include package="zope.annotation" />
-    ...     
+    ...
     ...     <include package="plone.rfc822" />
-    ...     
+    ...
     ... </configure>
     ... """
 
-    >>> from StringIO import StringIO
+    >>> from six import StringIO
     >>> from zope.configuration import xmlconfig
     >>> xmlconfig.xmlconfig(StringIO(configuration))
 
@@ -54,9 +54,9 @@ Constructing a message
 Let's now say we have an instance providing this interface, which we want to
 marshal to a message.
 
-    >>> from zope.interface import implements
-    >>> class TestContent(object):
-    ...     implements(ITestContent)
+    >>> from zope.interface import implementer
+    >>> @implementer(ITestContent)
+    ... class TestContent(object):
     ...     title = u""
     ...     description = u""
     ...     body = u""
@@ -76,10 +76,10 @@ We could create a message form this instance and schema like this:
 The output looks like this:
 
     >>> from plone.rfc822 import renderMessage
-    >>> print renderMessage(msg)
+    >>> print(renderMessage(msg))
     title: Test title
-    description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
-    emptyfield: 
+    description: =?utf-8?q?Test_description...with_a_newline?=
+    emptyfield:
     Content-Type: text/plain; charset="utf-8"
     <BLANKLINE>
     <p>Test body</p>
@@ -101,10 +101,10 @@ encoding.
 If we want to use a different content type, we could set it explicitly:
 
     >>> msg.set_type('text/html')
-    >>> print renderMessage(msg)
+    >>> print(renderMessage(msg))
     title: Test title
-    description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
-    emptyfield: 
+    description: =?utf-8?q?Test_description...with_a_newline?=
+    emptyfield:
     MIME-Version: 1.0
     Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
@@ -135,7 +135,7 @@ the ``getContentType()``:
 
     >>> class TestBodyMarshaler(UnicodeValueFieldMarshaler):
     ...     adapts(ITestContent, IText)
-    ...     
+    ...
     ...     def getContentType(self):
     ...         return 'text/html'
 
@@ -153,10 +153,10 @@ above), or have the marshaler check the field name.
 Let's now try again:
 
     >>> msg = constructMessageFromSchema(content, ITestContent)
-    >>> print renderMessage(msg)
+    >>> print(renderMessage(msg))
     title: Test title
-    description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
-    emptyfield: 
+    description: =?utf-8?q?Test_description...with_a_newline?=
+    emptyfield:
     MIME-Version: 1.0
     Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
@@ -204,7 +204,7 @@ We can also consume messages with a transfer encoding and a charset:
     >>> messageBody = """\
     ... title: =?utf-8?q?Test_title?=
     ... description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
-    ... emptyfield: 
+    ... emptyfield:
     ... Content-Transfer-Encoding: base64
     ... Content-Type: text/html; charset="utf-8"
     ... <BLANKLINE>
@@ -216,7 +216,7 @@ We can also consume messages with a transfer encoding and a charset:
     'text/html'
     >>> msg.get_content_charset()
     'utf-8'
-    
+
     >>> initializeObjectFromSchema(newContent, ITestContent, msg)
 
     >>> newContent.title
@@ -244,16 +244,16 @@ in an annotation adapter:
     ...     description = schema.Text(title=u"Personal description")
     ...     currentAge = schema.Int(title=u"Age", min=0)
     ...     personalProfile = schema.Text(title=u"Profile")
-    
+
     >>> alsoProvides(IPersonalDetails['personalProfile'], IPrimaryField)
-    
+
 The annotation storage would look like this:
 
     >>> from persistent import Persistent
-    >>> class PersonalDetailsAnnotation(Persistent):
-    ...     implements(IPersonalDetails)
+    >>> @implementer(IPersonalDetails)
+    ... class PersonalDetailsAnnotation(Persistent):
     ...     adapts(ITestContent)
-    ...     
+    ...
     ...     def __init__(self):
     ...         self.description = None
     ...         self.currentAge = None
@@ -291,17 +291,17 @@ Here are the fields it will see:
     >>> [f[0] for f in allFields if IPrimaryField.providedBy(f[1])]
     ['body', 'personalProfile']
 
-Let's now construct a message. Since we now have two fields called 
+Let's now construct a message. Since we now have two fields called
 ``description``, we will get two headers by that name. Since we have two
 primary fields, we will get a multipart message with two attachments.
 
     >>> from plone.rfc822 import constructMessageFromSchemata
     >>> msg = constructMessageFromSchemata(content, (ITestContent, IPersonalDetails,))
     >>> msgString = renderMessage(msg)
-    >>> print msgString
+    >>> print(msgString)
     title: Test title
-    description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
-    emptyfield: 
+    description: =?utf-8?q?Test_description...with_a_newline?=
+    emptyfield:
     description: <p>My description</p>
     currentAge: 21
     MIME-Version: 1.0
@@ -340,7 +340,7 @@ attachments to the two primary fields:
 
     >>> newContent.title
     u'Test title'
-    
+
     >>> newContent.description
     u'Test description\nwith a newline'
 
@@ -353,10 +353,10 @@ attachments to the two primary fields:
 
     >>> newPersonalDetails.currentAge
     21
-    
+
     >>> newPersonalDetails.personalProfile
     u'<p>My profile</p>'
-    
+
 Alternative ways to deal with multiple schemata
 -----------------------------------------------
 
@@ -371,20 +371,20 @@ own multipart message. To do that, we would simply use the
     >>> mainMessage = constructMessageFromSchema(content, ITestContent)
     >>> personalDetailsMessage = constructMessageFromSchema(content, IPersonalDetails)
 
-    >>> from email.MIMEMultipart import MIMEMultipart
+    >>> from email.mime.multipart import MIMEMultipart
     >>> envelope = MIMEMultipart()
     >>> envelope.attach(mainMessage)
     >>> envelope.attach(personalDetailsMessage)
 
     >>> envelopeString = renderMessage(envelope)
-    >>> print envelopeString
+    >>> print(envelopeString)
     Content-Type: multipart/mixed; boundary="===============...=="
     MIME-Version: 1.0
     <BLANKLINE>
     --===============...==
     title: Test title
-    description: =?utf-8?q?Test_description=0D=0Awith_a_newline?=
-    emptyfield: 
+    description: =?utf-8?q?Test_description...with_a_newline?=
+    emptyfield:
     MIME-Version: 1.0
     Content-Type: text/html; charset="utf-8"
     <BLANKLINE>
@@ -410,16 +410,17 @@ marshaler in ``plone.namedfile``.
 Let's say we have a value type intended to represent a binary file with a
 filename and content type:
 
-    >>> from zope.interface import Interface, implements
+    >>> from zope.interface import Interface, implementer
     >>> from zope import schema
-    
+
     >>> class IFileValue(Interface):
     ...     data = schema.Bytes(title=u"Raw data")
     ...     contentType = schema.ASCIILine(title=u"MIME type")
     ...     filename = schema.ASCIILine(title=u"Filename")
 
-    >>> class FileValue(object):
-    ...     implements(IFileValue)
+    >>> @implementer(IFileValue)
+    ... class FileValue(object):
+    ...
     ...     def __init__(self, data, contentType, filename):
     ...         self.data = data
     ...         self.contentType = contentType
@@ -431,8 +432,8 @@ Suppose we had a custom field type to represent this:
     >>> class IFileField(IObject):
     ...     pass
 
-    >>> class FileField(schema.Object):
-    ...     implements(IFileField)
+    >>> @implementer(IFileField)
+    ... class FileField(schema.Object):
     ...     schema = IFileValue
     ...     def __init__(self, **kw):
     ...         if 'schema' in kw:
@@ -448,11 +449,11 @@ We can register a field marshaler for this field which will do the following:
 * Encode the payload using base64
 
     >>> from plone.rfc822.interfaces import IFieldMarshaler
-    >>> from email.Encoders import encode_base64
+    >>> from email.encoders import encode_base64
 
     >>> from zope.component import adapts
     >>> from plone.rfc822.defaultfields import BaseFieldMarshaler
-    
+
     >>> class FileFieldMarshaler(BaseFieldMarshaler):
     ...     adapts(Interface, IFileField)
     ...
@@ -464,14 +465,14 @@ We can register a field marshaler for this field which will do the following:
     ...         if value is None:
     ...             return None
     ...         return value.data
-    ...     
+    ...
     ...     def decode(self, value, message=None, charset='utf-8', contentType=None, primary=False):
     ...         filename = None
     ...         # get the filename from the Content-Disposition header if possible
     ...         if primary and message is not None:
     ...             filename = message.get_filename(None)
     ...         return FileValue(value, contentType, filename)
-    ...     
+    ...
     ...     def getContentType(self):
     ...         value = self._query()
     ...         if value is None:
@@ -490,19 +491,19 @@ We can register a field marshaler for this field which will do the following:
     ...                 message.add_header('Content-Disposition', 'attachment', filename=filename)
     ...         # Apply base64 encoding
     ...         encode_base64(message)
-    
+
     >>> from zope.component import provideAdapter
     >>> provideAdapter(FileFieldMarshaler)
 
 To illustrate marshaling, let's create a content object that contains two file
 fields.
-    
+
     >>> class IFileContent(Interface):
     ...     file1 = FileField()
     ...     file2 = FileField()
 
-    >>> class FileContent(object):
-    ...     implements(IFileContent)
+    >>> @implementer(IFileContent)
+    ... class FileContent(object):
     ...     file1 = None
     ...     file2 = None
 
@@ -515,7 +516,7 @@ what happens when we attempt to construct a message from this schema.
 
     >>> from plone.rfc822 import constructMessageFromSchema
     >>> message = constructMessageFromSchema(fileContent, IFileContent)
-    >>> print renderMessage(message)
+    >>> print(renderMessage(message))
     <BLANKLINE>
     <BLANKLINE>
 
@@ -525,10 +526,10 @@ field as primary:
     >>> from plone.rfc822.interfaces import IPrimaryField
     >>> from zope.interface import alsoProvides
     >>> alsoProvides(IFileContent['file1'], IPrimaryField)
-    
+
     >>> message = constructMessageFromSchema(fileContent, IFileContent)
     >>> messageBody = renderMessage(message)
-    >>> print messageBody
+    >>> print(messageBody)
     MIME-Version: 1.0
     Content-Type: text/plain
     Content-Disposition: attachment; filename="dummy1.txt"
@@ -543,11 +544,11 @@ We can also reconstruct the object from this message.
 
     >>> from plone.rfc822 import initializeObjectFromSchema
     >>> from email import message_from_string
-    
+
     >>> inputMessage = message_from_string(messageBody)
     >>> newFileContent = FileContent()
     >>> initializeObjectFromSchema(newFileContent, IFileContent, inputMessage)
-    
+
     >>> newFileContent.file1.data
     'dummy file'
     >>> newFileContent.file1.contentType
@@ -564,7 +565,7 @@ In this case, we should get a multipart document with two payloads.
     >>> alsoProvides(IFileContent['file2'], IPrimaryField)
     >>> message = constructMessageFromSchema(fileContent, IFileContent)
     >>> messageBody = renderMessage(message)
-    >>> print messageBody # doctest: +ELLIPSIS
+    >>> print(messageBody) # doctest: +ELLIPSIS
     MIME-Version: 1.0
     Content-Type: multipart/mixed; boundary="===============...=="
     <BLANKLINE>
@@ -589,7 +590,7 @@ And again, we can reconstruct the object, this time with both fields:
     >>> inputMessage = message_from_string(messageBody)
     >>> newFileContent = FileContent()
     >>> initializeObjectFromSchema(newFileContent, IFileContent, inputMessage)
-    
+
     >>> newFileContent.file1.data
     'dummy file'
     >>> newFileContent.file1.contentType

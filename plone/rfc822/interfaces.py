@@ -3,6 +3,8 @@ from zope import schema
 from zope.interface import Attribute
 from zope.interface import Interface
 
+import six
+
 
 class IPrimaryField(Interface):
     """Marker interface for the primary field in a schema
@@ -106,8 +108,8 @@ class IFieldMarshaler(Interface):
     """Multi-adapter on (context, field), used for marshalling to and
     demarshalling from RFC2822 message headers.
 
-    This interface deals in unicode strings, which will be encoded/decoded
-    elsewhere.
+    This interface deals in six.text_type strings, which will be
+    encoded/decoded elsewhere.
     """
 
     ascii = schema.Bool(

@@ -6,18 +6,18 @@ import these from plone.rfc822 directly, not from this module.
 See interfaces.py for details.
 """
 
-from cStringIO import StringIO
-from email.Generator import Generator
-from email.Header import decode_header
-from email.Header import Header
-# Note: We use capitalised module names to be compatible with Python 2.4
-from email.Message import Message
+from email.generator import Generator
+from email.header import decode_header
+from email.header import Header
+from email.message import Message
+from io import BytesIO
 from plone.rfc822.interfaces import IFieldMarshaler
 from plone.rfc822.interfaces import IPrimaryField
 from zope.component import queryMultiAdapter
 from zope.schema import getFieldsInOrder
 
 import logging
+import six
 
 
 LOG = logging.getLogger('plone.rfc822')
@@ -54,18 +54,18 @@ def constructMessage(context, fields, charset='utf-8'):
 
         try:
             value = marshaler.marshal(charset, primary=False)
-        except ValueError, e:
+        except ValueError as e:
             LOG.debug("Marshaling of %s for %s failed: %s" %
                       (name, repr(context), str(e)))
             continue
 
         if value is None:
-            value = ''
-        elif not isinstance(value, str):
+            value = b''
+        elif not isinstance(value, six.binary_type):
             raise ValueError(
-                "Marshaler for field %s did not return a string" % name)
+                "Marshaler for field %s did not return bytes" % name)
 
-        if marshaler.ascii and '\n' not in value:
+        if marshaler.ascii and b'\n' not in value:
             msg[name] = value
         else:
             msg[name] = Header(value, charset)
@@ -137,7 +137,7 @@ def constructMessage(context, fields, charset='utf-8'):
 
 
 def renderMessage(message, mangleFromHeader=False):
-    out = StringIO()
+    out = BytesIO()
     generator = Generator(out, mangle_from_=mangleFromHeader)
     generator.flatten(message)
     return out.getvalue()
@@ -224,7 +224,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                 contentType=contentType,
                 primary=False
             )
-        except ValueError, e:
+        except ValueError as e:
             # interface allows demarshal() to raise ValueError to indicate
             # marshalling failed
             LOG.debug("Demarshalling of %s for %s failed: %s" %
@@ -263,7 +263,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                         contentType=contentType,
                         primary=True
                     )
-                except ValueError, e:
+                except ValueError as e:
                     # interface allows demarshal() to raise ValueError to
                     # indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" %
@@ -313,7 +313,7 @@ def initializeObject(context, fields, message, defaultCharset='utf-8'):
                         contentType=contentType,
                         primary=True
                     )
-                except ValueError, e:
+                except ValueError as e:
                     # interface allows demarshal() to raise ValueError to
                     # indicate marshalling failed
                     LOG.debug("Demarshalling of %s for %s failed: %s" %

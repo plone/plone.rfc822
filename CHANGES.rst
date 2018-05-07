@@ -10,7 +10,8 @@ Breaking changes:
 
 New features:
 
-- *add item here*
+- Start basic Python 3 support.
+  [pbauer, dhavlik]
 
 Bug fixes:
 

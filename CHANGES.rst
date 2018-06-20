@@ -4,18 +4,10 @@ Changelog
 1.1.4 (unreleased)
 ------------------
 
-Breaking changes:
-
-- *add item here*
-
 New features:
 
 - Start basic Python 3 support.
   [pbauer, dhavlik]
-
-Bug fixes:
-
-- *add item here*
 
 
 1.1.3 (2016-08-09)

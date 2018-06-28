@@ -23,9 +23,9 @@ optionflags = doctest.ELLIPSIS | \
 class Py23DocChecker(doctest.OutputChecker):
     def check_output(self, want, got, optionflags):
         if six.PY2:
-            want = re.sub("b'(.*?)'", "'\\1'", want)
-        else:
-            want = re.sub('u"(.*?)"', '"\\1"', want)
+            got = re.sub("u'(.*?)'", "'\\1'", got)
+        if six.PY3:
+            got = re.sub("b'(.*?)'", "'\\1'", got)
         return doctest.OutputChecker.check_output(self, want, got, optionflags)
 
 

@@ -31,9 +31,9 @@ Unsupported by default:
 * InterfaceField - stores Interface
 * Dict - stores a dict
 """
-
+from __future__ import unicode_literals
 from plone.rfc822.interfaces import IFieldMarshaler
-from zope.component import adapts
+from zope.component import adapter
 from zope.component import queryMultiAdapter
 from zope.interface import implementer
 from zope.interface import Interface
@@ -62,15 +62,15 @@ class BaseFieldMarshaler(object):
     def __init__(self, context, field):
         self.context = context
         self.field = field.bind(context)
-
         self.instance = context
         if field.interface is not None:
             self.instance = field.interface(context, context)
 
     def marshal(self, charset='utf-8', primary=False):
         value = self._query(_marker)
-        return None if value is _marker else \
-            self.encode(value, charset, primary)
+        return (
+            None if value is _marker else self.encode(value, charset, primary)
+        )
 
     def demarshal(
         self,
@@ -78,12 +78,15 @@ class BaseFieldMarshaler(object):
         message=None,
         charset='utf-8',
         contentType=None,
-        primary=False
+        primary=False,
     ):
-        fieldValue = self.field.missing_value
+
         if value:
             fieldValue = self.decode(
-                value, message, charset, contentType, primary)
+                value, message, charset, contentType, primary
+            )
+        else:
+            fieldValue = self.field.missing_value
         self._set(fieldValue)
 
     def encode(self, value, charset='utf-8', primary=False):
@@ -95,10 +98,11 @@ class BaseFieldMarshaler(object):
         message=None,
         charset='utf-8',
         contentType=None,
-        primary=False
+        primary=False,
     ):
-        raise ValueError("Demarshalling not implemented for %s" %
-                         repr(self.field))
+        raise ValueError(
+            'Demarshalling not implemented for %s' % repr(self.field)
+        )
 
     def getContentType(self):
         return None
@@ -121,11 +125,10 @@ class BaseFieldMarshaler(object):
             raise ValueError(e)
 
 
+@adapter(Interface, IFromUnicode)
 class UnicodeFieldMarshaler(BaseFieldMarshaler):
     """Default marshaler for fields that support IFromUnicode
     """
-
-    adapts(Interface, IFromUnicode)
 
     def encode(self, value, charset='utf-8', primary=False):
         if value is None:
@@ -141,9 +144,12 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
         message=None,
         charset='utf-8',
         contentType=None,
-        primary=False
+        primary=False,
     ):
-        unicodeValue = value.decode(charset)
+        if isinstance(value, six.binary_type):
+            unicodeValue = value.decode(charset)
+        else:
+            unicodeValue = value
         try:
             return self.field.fromUnicode(unicodeValue)
         except Exception as e:
@@ -160,7 +166,8 @@ class UnicodeValueFieldMarshaler(UnicodeFieldMarshaler):
 
     def encode(self, value, charset='utf-8', primary=False):
         encoded = super(UnicodeValueFieldMarshaler, self).encode(
-            value, charset, primary)
+            value, charset, primary
+        )
         if not encoded or max(six.iterbytes(encoded)) < 128:
             self.ascii = True
         else:
@@ -179,12 +186,11 @@ class ASCIISafeFieldMarshaler(UnicodeFieldMarshaler):
         return None
 
 
+@adapter(Interface, IBytes)
 class BytesFieldMarshaler(BaseFieldMarshaler):
     """Default marshaler for IBytes fields and children. These store str
     objects, so we will attempt to encode them directly.
     """
-
-    adapts(Interface, IBytes)
 
     ascii = True
 
@@ -197,16 +203,15 @@ class BytesFieldMarshaler(BaseFieldMarshaler):
         message=None,
         charset='utf-8',
         contentType=None,
-        primary=False
+        primary=False,
     ):
         return value
 
 
+@adapter(Interface, IDatetime)
 class DatetimeMarshaler(BaseFieldMarshaler):
     """Marshaler for Python datetime values
     """
-
-    adapts(Interface, IDatetime)
 
     ascii = True
 
@@ -221,7 +226,7 @@ class DatetimeMarshaler(BaseFieldMarshaler):
         message=None,
         charset='utf-8',
         contentType=None,
-        primary=False
+        primary=False,
     ):
         unicodeValue = value.decode(charset)
         try:
@@ -230,6 +235,7 @@ class DatetimeMarshaler(BaseFieldMarshaler):
             raise ValueError(e)
 
 
+@adapter(Interface, IDate)
 class DateMarshaler(BaseFieldMarshaler):
     """Marshaler for Python date values.
 
@@ -237,8 +243,6 @@ class DateMarshaler(BaseFieldMarshaler):
     this does not seem to be capable of round-tripping values with time zone
     information.
     """
-
-    adapts(Interface, IDate)
 
     ascii = True
 
@@ -253,7 +257,7 @@ class DateMarshaler(BaseFieldMarshaler):
         message=None,
         charset='utf-8',
         contentType=None,
-        primary=False
+        primary=False,
     ):
         unicodeValue = value.decode(charset)
         try:
@@ -262,6 +266,7 @@ class DateMarshaler(BaseFieldMarshaler):
             raise ValueError(e)
 
 
+@adapter(Interface, ITimedelta)
 class TimedeltaMarshaler(BaseFieldMarshaler):
     """Marshaler for Python timedelta values
 
@@ -269,8 +274,6 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
     this does not seem to be capable of round-tripping values with time zone
     information.
     """
-
-    adapts(Interface, ITimedelta)
 
     ascii = True
 
@@ -285,7 +288,7 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
         message=None,
         charset='utf-8',
         contentType=None,
-        primary=False
+        primary=False,
     ):
         try:
             days, seconds, microseconds = [int(v) for v in value.split(":")]
@@ -294,17 +297,17 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
             raise ValueError(e)
 
 
+@adapter(Interface, ICollection)
 class CollectionMarshaler(BaseFieldMarshaler):
     """Marshaler for collection values
     """
-
-    adapts(Interface, ICollection)
 
     ascii = False
 
     def getCharset(self, default='utf-8'):
         valueTypeMarshaler = queryMultiAdapter(
-            (self.context, self.field.value_type,), IFieldMarshaler)
+            (self.context, self.field.value_type), IFieldMarshaler
+        )
         if valueTypeMarshaler is None:
             return None
         return valueTypeMarshaler.getCharset(default)
@@ -314,7 +317,8 @@ class CollectionMarshaler(BaseFieldMarshaler):
             return None
 
         valueTypeMarshaler = queryMultiAdapter(
-            (self.context, self.field.value_type,), IFieldMarshaler)
+            (self.context, self.field.value_type), IFieldMarshaler
+        )
         if valueTypeMarshaler is None:
             return None
 
@@ -322,7 +326,8 @@ class CollectionMarshaler(BaseFieldMarshaler):
         value_lines = []
         for item in value:
             marshaledValue = valueTypeMarshaler.encode(
-                item, charset=charset, primary=primary)
+                item, charset=charset, primary=primary
+            )
             if marshaledValue is None:
                 marshaledValue = ''
             value_lines.append(marshaledValue)
@@ -330,8 +335,10 @@ class CollectionMarshaler(BaseFieldMarshaler):
                 ascii = False
 
         self.ascii = ascii
-
-        return '||'.join(value_lines)
+        if value_lines and isinstance(value_lines[0], six.binary_type):
+            return b'||'.join(value_lines)
+        else:
+            return '||'.join(value_lines)
 
     def decode(
         self,
@@ -339,22 +346,30 @@ class CollectionMarshaler(BaseFieldMarshaler):
         message=None,
         charset='utf-8',
         contentType=None,
-        primary=False
+        primary=False,
     ):
         valueTypeMarshaler = queryMultiAdapter(
-            (self.context, self.field.value_type,), IFieldMarshaler)
+            (self.context, self.field.value_type), IFieldMarshaler
+        )
         if valueTypeMarshaler is None:
-            raise ValueError("Cannot demarshal value type %s" %
-                             repr(self.field.value_type))
+            raise ValueError(
+                'Cannot demarshal value type %s' % repr(self.field.value_type)
+            )
 
         listValue = []
-
-        for line in value.split('||'):
-            listValue.append(valueTypeMarshaler.decode(
-                line, message, charset, contentType, primary))
+        if isinstance(value, six.binary_type):
+            lines = value.split(b'||')
+        else:
+            lines = value.split('||')
+        for line in lines:
+            listValue.append(
+                valueTypeMarshaler.decode(
+                    line, message, charset, contentType, primary
+                )
+            )
 
         sequenceType = self.field._type
-        if isinstance(sequenceType, (list, tuple,)):
+        if isinstance(sequenceType, (list, tuple)):
             sequenceType = sequenceType[-1]
 
         return sequenceType(listValue)

@@ -1,16 +1,27 @@
 Changelog
 =========
 
-1.1.5 (unreleased)
-------------------
+2.0.0b1 (unreleased)
+--------------------
 
 Breaking changes:
 
-- *add item here*
+- Drop support of Python 2.6
+  [jensens]
+
+- Deprecate ``renderMessage(message)``,
+  use stdlibs ``message.as_string()`` from ``email.message.Message`` class instead.
+  [jensens]
+
+- Newline handling in MIME-headers are now escaped explicit.
+  This follows RFC2822 section 3.2.2.
+  [jensens]
 
 New features:
 
-- *add item here*
+- Support for Python 3.
+  Also big code overhaul included.
+  [jensens]
 
 Bug fixes:
 

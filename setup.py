@@ -5,7 +5,7 @@ from setuptools import setup
 import os
 
 
-version = '1.1.5.dev0'
+version = '2.0.0b1.dev0'
 
 setup(
     name='plone.rfc822',
@@ -19,17 +19,15 @@ setup(
     # https://pypi.python.org/pypi?%3Aaction=list_classifiers
     classifiers=[
         "Framework :: Plone",
-        "Framework :: Plone :: 4.3",
-        "Framework :: Plone :: 5.0",
-        "Framework :: Plone :: 5.1",
+        # "Framework :: Plone :: 5.2",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.6",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: BSD License",
     ],
     keywords='zope schema rfc822',
-    author='Martin Aspeli',
+    author='Martin Aspeli and contributors',
     author_email='optilude@gmail.com',
     url='https://pypi.python.org/pypi/plone.rfc822',
     license='BSD',
@@ -39,14 +37,15 @@ setup(
     zip_safe=False,
     extras_require={
         'supermodel': ['plone.supermodel'],
-        'test': ['plone.testing'],
+        'test': ['plone.testing', 'plone.supermodel'],
     },
     install_requires=[
-        'setuptools',
-        'zope.schema',
-        'zope.component',
-        'zope.interface',
         'python-dateutil',
+        'setuptools',
+        'zope.component',
+        'zope.deprecation',
+        'zope.interface',
+        'zope.schema',
     ],
     entry_points="""
     """,

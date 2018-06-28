@@ -5,159 +5,138 @@ import these from plone.rfc822 directly, not from this module.
 
 See interfaces.py for details.
 """
-
-from email.generator import Generator
+from __future__ import unicode_literals
 from email.header import decode_header
 from email.header import Header
 from email.message import Message
-from io import BytesIO
 from plone.rfc822.interfaces import IFieldMarshaler
 from plone.rfc822.interfaces import IPrimaryField
 from zope.component import queryMultiAdapter
+from zope.deprecation import deprecate
 from zope.schema import getFieldsInOrder
 
 import logging
 import six
 
 
-LOG = logging.getLogger('plone.rfc822')
+logger = logging.getLogger("plone.rfc822")
 
 
-def constructMessageFromSchema(context, schema, charset='utf-8'):
+def constructMessageFromSchema(context, schema, charset="utf-8"):
     return constructMessage(context, getFieldsInOrder(schema), charset)
 
 
-def constructMessageFromSchemata(context, schemata, charset='utf-8'):
+def constructMessageFromSchemata(context, schemata, charset="utf-8"):
     fields = []
     for schema in schemata:
         fields.extend(getFieldsInOrder(schema))
     return constructMessage(context, fields, charset)
 
 
-def constructMessage(context, fields, charset='utf-8'):
-    msg = Message()
+def _add_payload_to_message(context, msg, primary, charset):
+    """If there's a single primary field, we have a non-multipart message with
+    a string payload. Otherwise, we return a multipart message
+    """
+    if not primary:
+        return
+    is_multipart = len(primary) > 1
+    if is_multipart:
+        msg.set_type("multipart/mixed")
 
-    primary = []
+    for name, field in primary:
+        if is_multipart:
+            payload = Message()
+        else:
+            payload = msg
+        marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
+        if marshaler is None:
+            continue
+
+        contentType = marshaler.getContentType()
+        payloadCharset = marshaler.getCharset(charset)
+
+        if contentType is not None:
+            payload.set_type(contentType)
+        if payloadCharset is not None:
+            # using set_charset() would also add transfer encoding,
+            # which we don't want to do always
+            payload.set_param("charset", payloadCharset)
+
+        value = marshaler.marshal(charset, primary=True)
+
+        if value is None:
+            continue
+        payload.set_payload(value)
+        marshaler.postProcessMessage(payload)
+        if is_multipart:
+            msg.attach(payload)
+
+
+def constructMessage(context, fields, charset="utf-8"):
+    msg = Message()
+    primaries = []
 
     # First get all headers, storing primary fields for later
     for name, field in fields:
-
         if IPrimaryField.providedBy(field):
-            primary.append((name, field,))
+            primaries.append((name, field))
             continue
-
-        marshaler = queryMultiAdapter((context, field,), IFieldMarshaler)
+        marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
         if marshaler is None:
-            LOG.debug("No marshaler found for field %s of %s" %
-                      (name, repr(context)))
+            logger.debug(
+                "No marshaler found for field {0} of {1}".format(
+                    name, repr(context)
+                )
+            )
             continue
-
         try:
             value = marshaler.marshal(charset, primary=False)
         except ValueError as e:
-            LOG.debug("Marshaling of %s for %s failed: %s" %
-                      (name, repr(context), str(e)))
+            logger.debug(
+                "Marshaling of {0} for {1} failed: {2}".format(
+                    name, repr(context), str(e)
+                )
+            )
             continue
-
         if value is None:
-            value = b''
-        elif not isinstance(value, six.binary_type):
-            raise ValueError(
-                "Marshaler for field %s did not return bytes" % name)
-
-        if marshaler.ascii and b'\n' not in value:
+            value = ""
+        if not isinstance(value, six.text_type):
+            # py3: email.message.Message headers are expecting text
+            value = value.decode("utf-8")
+        # if field.__name__ == 'description':
+        #     import pdb; pdb.set_trace()
+        if marshaler.ascii and "\n" not in value:
             msg[name] = value
         else:
+            if "\n" in value:
+                # see https://tools.ietf.org/html/rfc2822#section-3.2.2
+                value = value.replace(u"\n", r"\n")
             msg[name] = Header(value, charset)
 
     # Then deal with the primary field
-
-    # If there's a single primary field, we have a non-multipart message with
-    # a string payload
-
-    if len(primary) == 1:
-        name, field = primary[0]
-
-        marshaler = queryMultiAdapter((context, field,), IFieldMarshaler)
-        if marshaler is not None:
-            contentType = marshaler.getContentType()
-            payloadCharset = marshaler.getCharset(charset)
-
-            if contentType is not None:
-                msg.set_type(contentType)
-
-            if payloadCharset is not None:
-                # using set_charset() would also add transfer encoding,
-                # which we don't want to do always
-                msg.set_param('charset', payloadCharset)
-
-            value = marshaler.marshal(charset, primary=True)
-            if value is not None:
-                msg.set_payload(value)
-
-            marshaler.postProcessMessage(msg)
-
-    # Otherwise, we return a multipart message
-
-    elif len(primary) > 1:
-        msg.set_type('multipart/mixed')
-
-        for name, field in primary:
-
-            marshaler = queryMultiAdapter((context, field,), IFieldMarshaler)
-            if marshaler is None:
-                continue
-
-            payload = Message()
-            attach = False
-
-            contentType = marshaler.getContentType()
-            payloadCharset = marshaler.getCharset(charset)
-
-            if contentType is not None:
-                payload.set_type(contentType)
-                attach = True
-            if payloadCharset is not None:
-                # using set_charset() would also add transfer encoding,
-                # which we don't want to do always
-                payload.set_param('charset', payloadCharset)
-                attach = True
-
-            value = marshaler.marshal(charset, primary=True)
-
-            if value is not None:
-                payload.set_payload(value)
-                attach = True
-
-            if attach:
-                marshaler.postProcessMessage(payload)
-                msg.attach(payload)
+    _add_payload_to_message(context, msg, primaries, charset)
 
     return msg
 
 
+@deprecate(
+    "Use 'message.as_string()' from 'email.message.Message' class instead."
+)
 def renderMessage(message, mangleFromHeader=False):
-    out = BytesIO()
-    generator = Generator(out, mangle_from_=mangleFromHeader)
-    generator.flatten(message)
-    return out.getvalue()
+    # to be removed in a 3.x series
+    return message.as_string(mangleFromHeader)
 
 
 def initializeObjectFromSchema(
-    context,
-    schema,
-    message,
-    defaultCharset='utf-8'
+    context, schema, message, defaultCharset="utf-8"
 ):
-    initializeObject(context, getFieldsInOrder(
-        schema), message, defaultCharset)
+    initializeObject(
+        context, getFieldsInOrder(schema), message, defaultCharset
+    )
 
 
 def initializeObjectFromSchemata(
-    context,
-    schemata,
-    message,
-    defaultCharset='utf-8'
+    context, schemata, message, defaultCharset="utf-8"
 ):
     """Convenience method which calls ``initializeObject()`` with all the
     fields in order, of all the given schemata (a sequence of schema
@@ -170,152 +149,128 @@ def initializeObjectFromSchemata(
     return initializeObject(context, fields, message, defaultCharset)
 
 
-def initializeObject(context, fields, message, defaultCharset='utf-8'):
-    contentType = message.get_content_type()
+def initializeObject(context, fields, message, defaultCharset="utf-8"):
+    content_type = message.get_content_type()
 
     charset = message.get_charset()
     if charset is None:
-        charset = message.get_param('charset')
+        charset = message.get_param("charset")
     if charset is not None:
         charset = str(charset)
     else:
         charset = defaultCharset
 
-    headerFields = {}
+    header_fields = {}
     primary = []
-
     for name, field in fields:
         if IPrimaryField.providedBy(field):
             primary.append((name, field))
-        else:
-            headerFields.setdefault(name.lower(), []).append(field)
+            continue
+        header_fields.setdefault(name.lower(), []).append(field)
 
     # Demarshal each header
-
     for name, value in message.items():
-
         name = name.lower()
-        fieldset = headerFields.get(name, None)
+        fieldset = header_fields.get(name, None)
         if fieldset is None or len(fieldset) == 0:
-            LOG.debug("No matching field found for header %s" % name)
+            logger.debug("No matching field found for header {0}".format(name))
             continue
-
         field = fieldset.pop(0)
-
-        marshaler = queryMultiAdapter((context, field,), IFieldMarshaler)
+        marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
         if marshaler is None:
-            LOG.debug("No marshaler found for field %s of %s" %
-                      (name, repr(context)))
+            logger.debug(
+                "No marshaler found for field {0} of {1}".format(
+                    name, repr(context)
+                )
+            )
             continue
+        header_value, header_charset = decode_header(value)[0]
+        if header_charset is None:
+            header_charset = charset
 
-        headerValue, headerCharset = decode_header(value)[0]
-        if headerCharset is None:
-            headerCharset = charset
-
-        # MIME messages always use CRLF. For headers, we're probably safer with
-        # \n
-        headerValue = headerValue.replace('\r\n', '\n')
-
+        # MIME messages always use CRLF.
+        # For headers, we're probably safer with \n
+        #
+        # Also, replace escaped Newlines, for details see
+        # https://tools.ietf.org/html/rfc2822#section-3.2.2
+        if isinstance(header_value, six.binary_type):
+            header_value = header_value.replace(b"\r\n", b"\n")
+            header_value = header_value.replace(b"\\n", b"\n")
+        else:
+            header_value = header_value.replace("\r\n", "\n")
+            header_value = header_value.replace(r"\\n", "\n")
         try:
             marshaler.demarshal(
-                headerValue,
+                header_value,
                 message=message,
-                charset=headerCharset,
-                contentType=contentType,
-                primary=False
+                charset=header_charset,
+                contentType=content_type,
+                primary=False,
             )
         except ValueError as e:
             # interface allows demarshal() to raise ValueError to indicate
             # marshalling failed
-            LOG.debug("Demarshalling of %s for %s failed: %s" %
-                      (name, repr(context), str(e)))
-            continue
-
-    # Then demarshal the primary field
-
-    payload = message.get_payload()
-
-    # do nothing if we don't have a payload
-    if not payload:
-        return
-
-    # A single string payload
-    if isinstance(payload, str):
-        if len(primary) != 1:
-            raise ValueError(
-                'Got a single string payload for message, but no primary '
-                'fields found for %s' % repr(context))
-        else:
-            name, field = primary[0]
-
-            marshaler = queryMultiAdapter((context, field,), IFieldMarshaler)
-            if marshaler is None:
-                LOG.debug("No marshaler found for primary field %s of %s" %
-                          (name, repr(context),))
-            else:
-                payloadValue = message.get_payload(decode=True)
-                payloadCharset = message.get_content_charset(charset)
-                try:
-                    marshaler.demarshal(
-                        payloadValue,
-                        message=message,
-                        charset=payloadCharset,
-                        contentType=contentType,
-                        primary=True
-                    )
-                except ValueError as e:
-                    # interface allows demarshal() to raise ValueError to
-                    # indicate marshalling failed
-                    LOG.debug("Demarshalling of %s for %s failed: %s" %
-                              (name, repr(context), str(e)))
-
-    # Multiple payloads
-    elif isinstance(payload, (list, tuple,)):
-        if len(payload) != len(primary):
-            raise ValueError(
-                'Got %d payloads for message, but %s primary fields '
-                'found for %s' % (
-                    len(payload),
-                    len(primary),
-                    repr(context),
+            logger.debug(
+                "Demarshalling of {0} for {1} failed: {2}".format(
+                    name, repr(context), str(e)
                 )
             )
+            continue
+
+    # Then demarshal the primary field(s)
+    payloads = message.get_payload()
+
+    # do nothing if we don't have a payload
+    if not payloads:
+        return
+
+    # A single payload is a string, multiparts are lists
+    if isinstance(payloads, str):
+        if len(primary) != 1:
+            raise ValueError(
+                "Got a single string payload for message, but no primary "
+                "fields found for %s" % repr(context)
+            )
+        payloads = [message]
+
+    if len(payloads) != len(primary):
+        raise ValueError(
+            "Got %d payloads for message, but %s primary fields "
+            "found for %s" % (len(payloads), len(primary), repr(context))
+        )
+    for idx, payload in enumerate(payloads):
+        name, field = primary[idx]
+        payload_content_type = payload.get_content_type()
+        charset = message.get_charset()
+        if charset is not None:
+            charset = str(charset)
         else:
-            for idx, msg in enumerate(payload):
-                name, field = primary[idx]
+            charset = "utf-8"
 
-                contentType = msg.get_content_type()
-
-                charset = message.get_charset()
-                if charset is not None:
-                    charset = str(charset)
-                else:
-                    charset = 'utf-8'
-
-                marshaler = queryMultiAdapter(
-                    (context, field,), IFieldMarshaler)
-                if marshaler is None:
-                    LOG.debug(
-                        'No marshaler found for primary field %s of %s' % (
-                            name,
-                            repr(context),
-                        )
-                    )
-                    continue
-
-                payloadValue = msg.get_payload(decode=True)
-                payloadCharset = msg.get_content_charset(charset)
-                try:
-                    marshaler.demarshal(
-                        payloadValue,
-                        message=msg,
-                        charset=payloadCharset,
-                        contentType=contentType,
-                        primary=True
-                    )
-                except ValueError as e:
-                    # interface allows demarshal() to raise ValueError to
-                    # indicate marshalling failed
-                    LOG.debug("Demarshalling of %s for %s failed: %s" %
-                              (name, repr(context), str(e)))
-                    continue
+        marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
+        if marshaler is None:
+            logger.debug(
+                "No marshaler found for primary field {0} of {0}".format(
+                    name, repr(context)
+                )
+            )
+            continue
+        payload_value = payload.get_payload(decode=True)
+        payload_charset = payload.get_content_charset(charset)
+        try:
+            marshaler.demarshal(
+                payload_value,
+                message=payload,
+                charset=payload_charset,
+                contentType=payload_content_type,
+                primary=True,
+            )
+        except ValueError as e:
+            # interface allows demarshal() to raise ValueError to
+            # indicate marshalling failed
+            logger.debug(
+                "Demarshalling of {0} for {1} failed: {2}".format(
+                    name, repr(context), str(e)
+                )
+            )
+            continue

@@ -63,6 +63,8 @@ class IMessageAPI(Interface):
 
     def renderMessage(message, mangleFromHeader=False):
         """Render a message to a string
+
+        DEPRECATED. Use 'message.as_string()' instead.
         """
 
     def initializeObjectFromSchema(

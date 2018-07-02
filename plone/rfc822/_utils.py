@@ -6,6 +6,7 @@ import these from plone.rfc822 directly, not from this module.
 See interfaces.py for details.
 """
 from __future__ import unicode_literals
+from email.encoders import encode_base64
 from email.header import decode_header
 from email.header import Header
 from email.message import Message
@@ -36,9 +37,8 @@ def constructMessageFromSchemata(context, schemata, charset="utf-8"):
 def _add_payload_to_message(context, msg, primary, charset):
     """If there's a single primary field, we have a non-multipart message with
     a string payload. Otherwise, we return a multipart message
+
     """
-    if not primary:
-        return
     is_multipart = len(primary) > 1
     if is_multipart:
         msg.set_type("multipart/mixed")
@@ -52,21 +52,32 @@ def _add_payload_to_message(context, msg, primary, charset):
         if marshaler is None:
             continue
 
-        contentType = marshaler.getContentType()
-        payloadCharset = marshaler.getCharset(charset)
-
-        if contentType is not None:
-            payload.set_type(contentType)
-        if payloadCharset is not None:
-            # using set_charset() would also add transfer encoding,
-            # which we don't want to do always
-            payload.set_param("charset", payloadCharset)
-
         value = marshaler.marshal(charset, primary=True)
-
         if value is None:
             continue
-        payload.set_payload(value)
+
+        content_type = marshaler.getContentType()
+        if content_type is not None:
+            payload.set_type(content_type)
+
+        charset = marshaler.getCharset(charset)
+        if charset is None and not marshaler.ascii:
+            # we have real binary data such as images, files, etc.
+            # encode to base64!
+            payload.set_payload(value)
+            encode_base64(payload)
+        elif charset is not None:
+            # using set_charset() would also add transfer encoding to
+            # quoted-printable, which we don't want here.
+            # for unicodedata, we keep it as-is, so: binary
+            # payload['Content-Transfer-Encoding'] = "BINARY"
+            payload.set_param("charset", charset)
+            if isinstance(value, six.binary_type):
+                value = value.decode(charset)
+            payload.set_payload(value)
+        else:
+            payload.set_payload(value)
+
         marshaler.postProcessMessage(payload)
         if is_multipart:
             msg.attach(payload)
@@ -103,8 +114,6 @@ def constructMessage(context, fields, charset="utf-8"):
         if not isinstance(value, six.text_type):
             # py3: email.message.Message headers are expecting text
             value = value.decode("utf-8")
-        # if field.__name__ == 'description':
-        #     import pdb; pdb.set_trace()
         if marshaler.ascii and "\n" not in value:
             msg[name] = value
         else:

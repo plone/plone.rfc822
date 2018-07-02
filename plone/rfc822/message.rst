@@ -1,10 +1,6 @@
 Message construction and parsing
 ================================
 
-Use Python 3 bytes/string::
-
-    >>> from __future__ import unicode_literals
-
 This package contains helper methods to construct an RFC 2822 style message
 from a list of schema fields, and to parse a message and initialise an object
 based on its headers and body payload.
@@ -25,6 +21,8 @@ annotations, which we will use later in this test::
     ... </configure>
     ... """
 
+::
+
     >>> from six import StringIO
     >>> from zope.configuration import xmlconfig
     >>> xmlconfig.xmlconfig(StringIO(configuration))
@@ -35,7 +33,7 @@ The primary field
 The message body is assumed to originate from a "primary" field, which is
 indicated via a marker interface.
 
-To illustrate the pattern, consider the following schema interface:
+To illustrate the pattern, consider the following schema interface::
 
     >>> from zope.interface import Interface, alsoProvides
     >>> from plone.rfc822.interfaces import IPrimaryField
@@ -48,7 +46,7 @@ To illustrate the pattern, consider the following schema interface:
     ...     body = schema.Text(title=u"Body text")
     ...     emptyfield = schema.TextLine(title=u"Empty field", missing_value=u'missing')
 
-The primary field instance is marked like this:
+The primary field instance is marked like this::
 
     >>> alsoProvides(ITestContent['body'], IPrimaryField)
 
@@ -56,7 +54,7 @@ Constructing a message
 ----------------------
 
 Let's now say we have an instance providing this interface, which we want to
-marshal to a message.
+marshal to a message::
 
     >>> from zope.interface import implementer
     >>> @implementer(ITestContent)
@@ -72,12 +70,12 @@ marshal to a message.
     ... with a newline"""
     >>> content.body = "<p>Test body</p>"
 
-We could create a message form this instance and schema like this:
+We could create a message from this instance and schema like this::
 
     >>> from plone.rfc822 import constructMessageFromSchema
     >>> msg = constructMessageFromSchema(content, ITestContent)
 
-The output looks like this:
+The output looks like this::
 
     >>> print(msg.as_string())
     title: Test title
@@ -87,11 +85,11 @@ The output looks like this:
     <BLANKLINE>
     <p>Test body</p>
 
-Notice how the non-ASCII header values are UTF-8 encoded. The encoding
-algorithm is clever enough to only encode the value if it is necessary,
+Notice how the non-ASCII header values are UTF-8 encoded.
+The encoding algorithm is clever enough to only encode the value if it is necessary,
 leaving more readable field values otherwise.
 
-The body here is of the default message type:
+The body here is of the default message type::
 
     >>> msg.get_default_type()
     'text/plain'
@@ -101,7 +99,7 @@ This is because none of the default field types manage a content type.
 The body is also utf-8 encoded, because the primary field specified this
 encoding.
 
-If we want to use a different content type, we could set it explicitly:
+If we want to use a different content type, we could set it explicitly::
 
     >>> msg.set_type('text/html')
     >>> print(msg.as_string())
@@ -497,8 +495,6 @@ We can register a field marshaler for this field which will do the following:
     ...             if filename:
     ...                 # Add a new header storing the filename if we have one
     ...                 message.add_header('Content-Disposition', 'attachment', filename=filename)
-    ...         # Apply base64 encoding
-    ...         encode_base64(message)
 
     >>> from zope.component import provideAdapter
     >>> provideAdapter(FileFieldMarshaler)
@@ -540,8 +536,8 @@ field as primary:
     >>> print(messageBody)
     MIME-Version: 1.0
     Content-Type: text/plain
-    Content-Disposition: attachment; filename="dummy1.txt"
     Content-Transfer-Encoding: base64
+    Content-Disposition: attachment; filename="dummy1.txt"
     <BLANKLINE>
     ZHVtbXkgZmlsZQ==
 
@@ -580,15 +576,15 @@ In this case, we should get a multipart document with two payloads.
     --===============...==
     MIME-Version: 1.0
     Content-Type: text/plain
-    Content-Disposition: attachment; filename="dummy1.txt"
     Content-Transfer-Encoding: base64
+    Content-Disposition: attachment; filename="dummy1.txt"
     <BLANKLINE>
     ZHVtbXkgZmlsZQ==
     --===============...==
     MIME-Version: 1.0
     Content-Type: text/html
-    Content-Disposition: attachment; filename="dummy2.html"
     Content-Transfer-Encoding: base64
+    Content-Disposition: attachment; filename="dummy2.html"
     <BLANKLINE>
     PGh0bWw+PGJvZHk+dGVzdDwvYm9keT48L2h0bWw+
     --===============...==--...

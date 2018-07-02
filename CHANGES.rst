@@ -6,20 +6,24 @@ Changelog
 
 Breaking changes:
 
-- Drop support of Python 2.6
-  [jensens]
-
 - Deprecate ``renderMessage(message)``,
   use stdlibs ``message.as_string()`` from ``email.message.Message`` class instead.
   [jensens]
 
-- Newline handling in MIME-headers are now escaped explicit.
+- Newline handling in MIME-headers: ``\n`` are now escaped explicit.
   This follows RFC2822 section 3.2.2.
+  [jensens]
+
+- Drop support of Python 2.6
   [jensens]
 
 New features:
 
-- Support for Python 3.
+- ``constructMessage`` now handles base64 encoding automatically for all marshallers,
+  where ``marshaler.ascii`` is ``False`` and ``marshaler.getContentType`` is ``None``.
+  [jensens]
+
+- Support for Python 3+
   Also big code overhaul included.
   [jensens]
 

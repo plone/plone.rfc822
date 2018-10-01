@@ -16,7 +16,7 @@ setup(
         open("CHANGES.rst").read() + "\n" +
         open(os.path.join("plone", "rfc822", "message.rst")).read()),
     # Get more strings from
-    # https://pypi.python.org/pypi?%3Aaction=list_classifiers
+    # https://pypi.org/classifiers/
     classifiers=[
         "Framework :: Plone",
         "Framework :: Plone :: 4.3",
@@ -31,7 +31,7 @@ setup(
     keywords='zope schema rfc822',
     author='Martin Aspeli',
     author_email='optilude@gmail.com',
-    url='https://pypi.python.org/pypi/plone.rfc822',
+    url='https://pypi.org/project/plone.rfc822',
     license='BSD',
     packages=find_packages(exclude=['ez_setup']),
     namespace_packages=['plone'],

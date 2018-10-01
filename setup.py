@@ -34,7 +34,7 @@ setup(
     author_email='optilude@gmail.com',
     url='https://pypi.org/project/plone.rfc822',
     license='BSD',
-    packages=find_packages(exclude=['ez_setup']),
+    packages=find_packages(),
     namespace_packages=['plone'],
     include_package_data=True,
     zip_safe=False,

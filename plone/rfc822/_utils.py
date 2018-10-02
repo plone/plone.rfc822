@@ -5,7 +5,6 @@ import these from plone.rfc822 directly, not from this module.
 
 See interfaces.py for details.
 """
-from __future__ import unicode_literals
 from email.encoders import encode_base64
 from email.header import decode_header
 from email.header import Header
@@ -23,11 +22,16 @@ import six
 logger = logging.getLogger("plone.rfc822")
 
 
-def enforce_native_string(value, encoding='utf8'):
-    if six.PY2 and isinstance(value, six.text_type):
-        return value.encode(encoding)
-    if isinstance(value, six.binary_type):
+def safe_native_string(value, encoding='utf8'):
+    ''' Try to convert value into a native string
+    '''
+    if six.PY2:
+        if isinstance(value, six.text_type):
+            return value.encode(encoding)
+    elif isinstance(value, six.binary_type):
         return value.decode(encoding)
+    if not isinstance(value, str):
+        raise ValueError('Cannot convert %r into a native string' % value)
     return value
 
 
@@ -80,10 +84,10 @@ def _add_payload_to_message(context, msg, primary, charset):
             # for unicodedata, we keep it as-is, so: binary
             # payload['Content-Transfer-Encoding'] = "BINARY"
             payload.set_param("charset", charset)
-            value = enforce_native_string(value, charset)
+            value = safe_native_string(value, charset)
             payload.set_payload(value)
         else:
-            value = enforce_native_string(value)
+            value = safe_native_string(value)
             payload.set_payload(value)
 
         marshaler.postProcessMessage(payload)
@@ -121,12 +125,12 @@ def constructMessage(context, fields, charset="utf-8"):
         if value is None:
             value = ""
         # Enforce native strings
-        value = enforce_native_string(value)
+        value = safe_native_string(value)
         if marshaler.ascii and "\n" not in value:
             msg[name] = value
         else:
-            if "\n" in value:
-                # see https://tools.ietf.org/html/rfc2822#section-3.2.2
+            # see https://tools.ietf.org/html/rfc2822#section-3.2.2
+            if '\n' in value:
                 value = value.replace("\n", r"\n")
             msg[name] = Header(value, charset)
 

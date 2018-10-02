@@ -625,10 +625,5 @@ Technical both is fine.
     >>> content.description = "Test content\nwith newline difference"
     >>> msg = constructMessageFromSchema(content, ITestContent)
     >>> effective_output = msg.as_string()
-    >>> effective_output_line_2 = effective_output.split('\n')[1]
-    >>> if six.PY2:
-    ...     expected_output_line_2 = r"description: Test content\nwith newline difference"
-    ... else:
-    ...     expected_output_line_2 = r"description: =?utf-8?q?Test_content=5Cnwith_newline_difference?="
-    >>> effective_output_line_2 == expected_output_line_2
-    True
+    >>> effective_output.split('\n')[1]
+    'description: =?utf-8?q?Test_content=5Cnwith_newline_difference?='

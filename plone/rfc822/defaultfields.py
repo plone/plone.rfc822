@@ -31,7 +31,6 @@ Unsupported by default:
 * InterfaceField - stores Interface
 * Dict - stores a dict
 """
-from __future__ import unicode_literals
 from plone.rfc822.interfaces import IFieldMarshaler
 from zope.component import adapter
 from zope.component import queryMultiAdapter

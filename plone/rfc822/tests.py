@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from plone.rfc822._utils import safe_native_string
 from plone.testing import layered
 from plone.testing.zca import UNIT_TESTING
 
@@ -29,6 +30,14 @@ class Py23DocChecker(doctest.OutputChecker):
         return doctest.OutputChecker.check_output(self, want, got, optionflags)
 
 
+class TestUtils(unittest.TestCase):
+
+    def test_safe_native_string(self):
+        self.assertIsInstance(safe_native_string(b''), str)
+        self.assertIsInstance(safe_native_string(u''), str)
+        self.assertRaises(ValueError, safe_native_string, None)
+
+
 def test_suite():
 
     suite = unittest.TestSuite()
@@ -43,4 +52,5 @@ def test_suite():
         )
         for docfile in DOCFILES
     ])
+    suite.addTest(TestUtils('test_safe_native_string'))
     return suite

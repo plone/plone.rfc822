@@ -231,9 +231,10 @@ class DatetimeMarshaler(BaseFieldMarshaler):
         contentType=None,
         primary=False,
     ):
-        unicodeValue = value.decode(charset)
+        if isinstance(value, six.binary_type):
+            value = value.decode(charset)
         try:
-            return dateutil.parser.parse(unicodeValue)
+            return dateutil.parser.parse(value)
         except Exception as e:
             raise ValueError(e)
 

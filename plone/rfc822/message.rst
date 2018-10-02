@@ -457,11 +457,11 @@ We can register a field marshaler for this field which will do the following:
     >>> from plone.rfc822.interfaces import IFieldMarshaler
     >>> from email.encoders import encode_base64
 
-    >>> from zope.component import adapts
+    >>> from zope.component import adapter
     >>> from plone.rfc822.defaultfields import BaseFieldMarshaler
 
-    >>> class FileFieldMarshaler(BaseFieldMarshaler):
-    ...     adapts(Interface, IFileField)
+    >>> @adapter(Interface, IFileField)
+    ... class FileFieldMarshaler(BaseFieldMarshaler):
     ...
     ...     ascii = False
     ...

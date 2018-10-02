@@ -27,6 +27,13 @@
         for="* zope.schema.interfaces.IBool"
         factory=".defaultfields.ASCIISafeFieldMarshaler"
         />
+    <!-- We need this as a workaround for this issue:
+      https://github.com/zopefoundation/zope.schema/issues/80
+    -->
+    <adapter
+        for="* zope.schema._bootstrapfields.Bool"
+        factory=".defaultfields.ASCIISafeFieldMarshaler"
+        />
     <adapter
         for="* zope.schema.interfaces.IChoice"
         factory=".defaultfields.UnicodeValueFieldMarshaler"

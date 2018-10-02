@@ -23,6 +23,14 @@ import six
 logger = logging.getLogger("plone.rfc822")
 
 
+def enforce_native_string(value, encoding='utf8'):
+    if six.PY2 and isinstance(value, six.text_type):
+        return value.encode(encoding)
+    if isinstance(value, six.binary_type):
+        return value.decode(encoding)
+    return value
+
+
 def constructMessageFromSchema(context, schema, charset="utf-8"):
     return constructMessage(context, getFieldsInOrder(schema), charset)
 
@@ -72,10 +80,10 @@ def _add_payload_to_message(context, msg, primary, charset):
             # for unicodedata, we keep it as-is, so: binary
             # payload['Content-Transfer-Encoding'] = "BINARY"
             payload.set_param("charset", charset)
-            if isinstance(value, six.binary_type):
-                value = value.decode(charset)
+            value = enforce_native_string(value, charset)
             payload.set_payload(value)
         else:
+            value = enforce_native_string(value)
             payload.set_payload(value)
 
         marshaler.postProcessMessage(payload)
@@ -89,6 +97,7 @@ def constructMessage(context, fields, charset="utf-8"):
 
     # First get all headers, storing primary fields for later
     for name, field in fields:
+        value = ''
         if IPrimaryField.providedBy(field):
             primaries.append((name, field))
             continue
@@ -111,15 +120,14 @@ def constructMessage(context, fields, charset="utf-8"):
             continue
         if value is None:
             value = ""
-        if not isinstance(value, six.text_type):
-            # py3: email.message.Message headers are expecting text
-            value = value.decode("utf-8")
+        # Enforce native strings
+        value = enforce_native_string(value)
         if marshaler.ascii and "\n" not in value:
             msg[name] = value
         else:
             if "\n" in value:
                 # see https://tools.ietf.org/html/rfc2822#section-3.2.2
-                value = value.replace(u"\n", r"\n")
+                value = value.replace("\n", r"\n")
             msg[name] = Header(value, charset)
 
     # Then deal with the primary field

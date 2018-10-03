@@ -491,8 +491,8 @@ Timedelta
     >>> marshaler = getMultiAdapter((t, ITestContent['_timedelta']), IFieldMarshaler)
     >>> marshaler.marshal()
     '3:4:5'
-    >>> marshaler.decode('3:4:5')
-    datetime.timedelta(3, 4, 5)
+    >>> marshaler.decode('3:4:5') == datetime.timedelta(3, 4, 5)
+    True
     >>> marshaler.getContentType() is None
     True
     >>> marshaler.getCharset('utf-8') is None

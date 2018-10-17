@@ -3,8 +3,6 @@ from zope import schema
 from zope.interface import Attribute
 from zope.interface import Interface
 
-import six
-
 
 class IPrimaryField(Interface):
     """Marker interface for the primary field in a schema
@@ -63,6 +61,8 @@ class IMessageAPI(Interface):
 
     def renderMessage(message, mangleFromHeader=False):
         """Render a message to a string
+
+        DEPRECATED. Use 'message.as_string()' instead.
         """
 
     def initializeObjectFromSchema(
@@ -219,4 +219,8 @@ class IFieldMarshaler(Interface):
         """This is a chance to perform any post-processing of the message.
 
         It is only called for primary fields.
+
+        Note: Before version 2 of plone.rfc.822 this was used primary for
+        Base64 encoding of the body. Base64 encoding is handled now by default
+        in ``constructMessage``.
         """

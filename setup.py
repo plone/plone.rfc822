@@ -5,7 +5,7 @@ from setuptools import setup
 import os
 
 
-version = '2.0.0b1.dev0'
+version = '2.0.0'
 
 setup(
     name='plone.rfc822',

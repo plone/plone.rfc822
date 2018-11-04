@@ -27,10 +27,6 @@ New features:
   Also big code overhaul included.
   [jensens]
 
-Bug fixes:
-
-- *add item here*
-
 
 1.1.4 (2018-06-20)
 ------------------

@@ -246,7 +246,7 @@ def initializeObject(context, fields, message, defaultCharset="utf-8"):
         return
 
     # A single payload is a string, multiparts are lists
-    if isinstance(payloads, str):
+    if isinstance(payloads, six.string_types):
         if len(primary) != 1:
             raise ValueError(
                 "Got a single string payload for message, but no primary "

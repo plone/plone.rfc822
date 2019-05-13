@@ -1,0 +1,2 @@
+- Use a better type check in the payload parser.
+  [Rotonen]

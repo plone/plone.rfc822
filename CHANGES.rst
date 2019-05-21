@@ -8,6 +8,16 @@ Changelog
 
 .. towncrier release notes start
 
+2.0.1 (2019-05-21)
+------------------
+
+Bug fixes:
+
+
+- Use a better type check in the payload parser.
+  [Rotonen] (#7)
+
+
 2.0.0 (2018-11-04)
 ------------------
 

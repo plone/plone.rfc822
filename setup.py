@@ -44,7 +44,13 @@ setup(
     python_requires=">=3.8",
     extras_require={
         "supermodel": ["plone.supermodel"],
-        "test": ["plone.testing", "plone.supermodel"],
+        "test": [
+            "plone.testing",
+            "plone.supermodel",
+            "zope.annotation",
+            "zope.configuration",
+            "persistent",
+        ],
     },
     install_requires=[
         "python-dateutil",

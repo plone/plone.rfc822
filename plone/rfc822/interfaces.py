@@ -21,9 +21,9 @@ class IPrimaryFieldInfo(Interface):
 class IMessageAPI(Interface):
     """Functions provided by this module
 
-    These can all be imported as::
+    These can all be imported as:
 
-        >>> from plone.rfc822 import constructMessage
+    from plone.rfc822 import constructMessage
     """
 
     def constructMessageFromSchema(context, schema, charset="utf-8"):

@@ -44,7 +44,6 @@ from zope.schema.interfaces import ITimedelta
 
 import datetime
 import dateutil.parser
-import six
 
 
 _marker = object()

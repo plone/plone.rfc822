@@ -248,11 +248,7 @@ def initializeObject(context, fields, message, defaultCharset="utf-8"):
 
         marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
         if marshaler is None:
-            logger.debug(
-                "No marshaler found for primary field {0} of {0}".format(
-                    name, repr(context)
-                )
-            )
+            logger.debug(f"No marshaler found for primary field {name} of {context!r}")
             continue
         payload_value = payload.get_payload(decode=True)
         payload_charset = payload.get_content_charset(charset)

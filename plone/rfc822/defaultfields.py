@@ -52,8 +52,7 @@ _marker = object()
 
 @implementer(IFieldMarshaler)
 class BaseFieldMarshaler:
-    """Base class for field marshalers
-    """
+    """Base class for field marshalers"""
 
     ascii = False
 
@@ -64,48 +63,41 @@ class BaseFieldMarshaler:
         if field.interface is not None:
             self.instance = field.interface(context, context)
 
-    def marshal(self, charset='utf-8', primary=False):
+    def marshal(self, charset="utf-8", primary=False):
         value = self._query(_marker)
-        return (
-            None if value is _marker else self.encode(value, charset, primary)
-        )
+        return None if value is _marker else self.encode(value, charset, primary)
 
     def demarshal(
         self,
         value,
         message=None,
-        charset='utf-8',
+        charset="utf-8",
         contentType=None,
         primary=False,
     ):
-
         if value:
-            fieldValue = self.decode(
-                value, message, charset, contentType, primary
-            )
+            fieldValue = self.decode(value, message, charset, contentType, primary)
         else:
             fieldValue = self.field.missing_value
         self._set(fieldValue)
 
-    def encode(self, value, charset='utf-8', primary=False):
+    def encode(self, value, charset="utf-8", primary=False):
         return None
 
     def decode(
         self,
         value,
         message=None,
-        charset='utf-8',
+        charset="utf-8",
         contentType=None,
         primary=False,
     ):
-        raise ValueError(
-            'Demarshalling not implemented for %s' % repr(self.field)
-        )
+        raise ValueError("Demarshalling not implemented for %s" % repr(self.field))
 
     def getContentType(self):
         return None
 
-    def getCharset(self, default='utf-8'):
+    def getCharset(self, default="utf-8"):
         return None
 
     def postProcessMessage(self, message):
@@ -117,10 +109,10 @@ class BaseFieldMarshaler:
         return self.field.query(self.instance, default)
 
     def _set(self, value):
-        if getattr(self.instance, 'marker', False):
+        if getattr(self.instance, "marker", False):
             print(self.field.__name__)
             print(value)
-            print('-' * 5)
+            print("-" * 5)
         try:
             self.field.set(self.instance, value)
         except TypeError as e:
@@ -129,10 +121,9 @@ class BaseFieldMarshaler:
 
 @adapter(Interface, IFromUnicode)
 class UnicodeFieldMarshaler(BaseFieldMarshaler):
-    """Default marshaler for fields that support IFromUnicode
-    """
+    """Default marshaler for fields that support IFromUnicode"""
 
-    def encode(self, value, charset='utf-8', primary=False):
+    def encode(self, value, charset="utf-8", primary=False):
         if value is None:
             return
         if isinstance(value, bytes):
@@ -144,7 +135,7 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
         self,
         value,
         message=None,
-        charset='utf-8',
+        charset="utf-8",
         contentType=None,
         primary=False,
     ):
@@ -157,7 +148,7 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
         except Exception as e:
             raise ValueError(e)
 
-    def getCharset(self, default='utf-8'):
+    def getCharset(self, default="utf-8"):
         return default
 
 
@@ -166,10 +157,8 @@ class UnicodeValueFieldMarshaler(UnicodeFieldMarshaler):
     ASCII safe.
     """
 
-    def encode(self, value, charset='utf-8', primary=False):
-        encoded = super().encode(
-            value, charset, primary
-        )
+    def encode(self, value, charset="utf-8", primary=False):
+        encoded = super().encode(value, charset, primary)
         if not encoded or max(iter(encoded)) < 128:
             self.ascii = True
         else:
@@ -184,7 +173,7 @@ class ASCIISafeFieldMarshaler(UnicodeFieldMarshaler):
 
     ascii = True
 
-    def getCharset(self, default='utf-8'):
+    def getCharset(self, default="utf-8"):
         return None
 
 
@@ -196,14 +185,14 @@ class BytesFieldMarshaler(BaseFieldMarshaler):
 
     ascii = True
 
-    def encode(self, value, charset='utf-8', primary=False):
+    def encode(self, value, charset="utf-8", primary=False):
         return value
 
     def decode(
         self,
         value,
         message=None,
-        charset='utf-8',
+        charset="utf-8",
         contentType=None,
         primary=False,
     ):
@@ -212,12 +201,11 @@ class BytesFieldMarshaler(BaseFieldMarshaler):
 
 @adapter(Interface, IDatetime)
 class DatetimeMarshaler(BaseFieldMarshaler):
-    """Marshaler for Python datetime values
-    """
+    """Marshaler for Python datetime values"""
 
     ascii = True
 
-    def encode(self, value, charset='utf-8', primary=False):
+    def encode(self, value, charset="utf-8", primary=False):
         if value is None:
             return None
         return value.isoformat()
@@ -226,7 +214,7 @@ class DatetimeMarshaler(BaseFieldMarshaler):
         self,
         value,
         message=None,
-        charset='utf-8',
+        charset="utf-8",
         contentType=None,
         primary=False,
     ):
@@ -249,7 +237,7 @@ class DateMarshaler(BaseFieldMarshaler):
 
     ascii = True
 
-    def encode(self, value, charset='utf-8', primary=False):
+    def encode(self, value, charset="utf-8", primary=False):
         if value is None:
             return None
         return value.isoformat()
@@ -258,7 +246,7 @@ class DateMarshaler(BaseFieldMarshaler):
         self,
         value,
         message=None,
-        charset='utf-8',
+        charset="utf-8",
         contentType=None,
         primary=False,
     ):
@@ -280,7 +268,7 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
 
     ascii = True
 
-    def encode(self, value, charset='utf-8', primary=False):
+    def encode(self, value, charset="utf-8", primary=False):
         if value is None:
             return None
         return "%d:%d:%d" % (value.days, value.seconds, value.microseconds)
@@ -289,7 +277,7 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
         self,
         value,
         message=None,
-        charset='utf-8',
+        charset="utf-8",
         contentType=None,
         primary=False,
     ):
@@ -302,12 +290,11 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
 
 @adapter(Interface, ICollection)
 class CollectionMarshaler(BaseFieldMarshaler):
-    """Marshaler for collection values
-    """
+    """Marshaler for collection values"""
 
     ascii = False
 
-    def getCharset(self, default='utf-8'):
+    def getCharset(self, default="utf-8"):
         valueTypeMarshaler = queryMultiAdapter(
             (self.context, self.field.value_type), IFieldMarshaler
         )
@@ -315,7 +302,7 @@ class CollectionMarshaler(BaseFieldMarshaler):
             return None
         return valueTypeMarshaler.getCharset(default)
 
-    def encode(self, value, charset='utf-8', primary=False):
+    def encode(self, value, charset="utf-8", primary=False):
         if value is None:
             return None
 
@@ -332,22 +319,22 @@ class CollectionMarshaler(BaseFieldMarshaler):
                 item, charset=charset, primary=primary
             )
             if marshaledValue is None:
-                marshaledValue = ''
+                marshaledValue = ""
             value_lines.append(marshaledValue)
             if not valueTypeMarshaler.ascii:
                 ascii = False
 
         self.ascii = ascii
         if value_lines and isinstance(value_lines[0], bytes):
-            return b'||'.join(value_lines)
+            return b"||".join(value_lines)
         else:
-            return '||'.join(value_lines)
+            return "||".join(value_lines)
 
     def decode(
         self,
         value,
         message=None,
-        charset='utf-8',
+        charset="utf-8",
         contentType=None,
         primary=False,
     ):
@@ -356,19 +343,17 @@ class CollectionMarshaler(BaseFieldMarshaler):
         )
         if valueTypeMarshaler is None:
             raise ValueError(
-                'Cannot demarshal value type %s' % repr(self.field.value_type)
+                "Cannot demarshal value type %s" % repr(self.field.value_type)
             )
 
         listValue = []
         if isinstance(value, bytes):
-            lines = value.split(b'||')
+            lines = value.split(b"||")
         else:
-            lines = value.split('||')
+            lines = value.split("||")
         for line in lines:
             listValue.append(
-                valueTypeMarshaler.decode(
-                    line, message, charset, contentType, primary
-                )
+                valueTypeMarshaler.decode(line, message, charset, contentType, primary)
             )
 
         sequenceType = self.field._type

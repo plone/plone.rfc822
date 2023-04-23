@@ -21,16 +21,15 @@ import six
 logger = logging.getLogger("plone.rfc822")
 
 
-def safe_native_string(value, encoding='utf8'):
-    ''' Try to convert value into a native string
-    '''
+def safe_native_string(value, encoding="utf8"):
+    """Try to convert value into a native string"""
     if six.PY2:
         if isinstance(value, str):
             return value.encode(encoding)
     elif isinstance(value, bytes):
         return value.decode(encoding)
     if not isinstance(value, str):
-        raise ValueError('Cannot convert %r into a native string' % value)
+        raise ValueError("Cannot convert %r into a native string" % value)
     return value
 
 
@@ -100,25 +99,21 @@ def constructMessage(context, fields, charset="utf-8"):
 
     # First get all headers, storing primary fields for later
     for name, field in fields:
-        value = ''
+        value = ""
         if IPrimaryField.providedBy(field):
             primaries.append((name, field))
             continue
         marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
         if marshaler is None:
             logger.debug(
-                "No marshaler found for field {} of {}".format(
-                    name, repr(context)
-                )
+                "No marshaler found for field {} of {}".format(name, repr(context))
             )
             continue
         try:
             value = marshaler.marshal(charset, primary=False)
         except ValueError as e:
             logger.debug(
-                "Marshaling of {} for {} failed: {}".format(
-                    name, repr(context), str(e)
-                )
+                "Marshaling of {} for {} failed: {}".format(name, repr(context), str(e))
             )
             continue
         if value is None:
@@ -129,7 +124,7 @@ def constructMessage(context, fields, charset="utf-8"):
             msg[name] = value
         else:
             # see https://tools.ietf.org/html/rfc2822#section-3.2.2
-            if '\n' in value:
+            if "\n" in value:
                 value = value.replace("\n", r"\n")
             msg[name] = Header(value, charset)
 
@@ -139,25 +134,17 @@ def constructMessage(context, fields, charset="utf-8"):
     return msg
 
 
-@deprecate(
-    "Use 'message.as_string()' from 'email.message.Message' class instead."
-)
+@deprecate("Use 'message.as_string()' from 'email.message.Message' class instead.")
 def renderMessage(message, mangleFromHeader=False):
     # to be removed in a 3.x series
     return message.as_string(mangleFromHeader)
 
 
-def initializeObjectFromSchema(
-    context, schema, message, defaultCharset="utf-8"
-):
-    initializeObject(
-        context, getFieldsInOrder(schema), message, defaultCharset
-    )
+def initializeObjectFromSchema(context, schema, message, defaultCharset="utf-8"):
+    initializeObject(context, getFieldsInOrder(schema), message, defaultCharset)
 
 
-def initializeObjectFromSchemata(
-    context, schemata, message, defaultCharset="utf-8"
-):
+def initializeObjectFromSchemata(context, schemata, message, defaultCharset="utf-8"):
     """Convenience method which calls ``initializeObject()`` with all the
     fields in order, of all the given schemata (a sequence of schema
     interfaces).
@@ -199,9 +186,7 @@ def initializeObject(context, fields, message, defaultCharset="utf-8"):
         marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
         if marshaler is None:
             logger.debug(
-                "No marshaler found for field {} of {}".format(
-                    name, repr(context)
-                )
+                "No marshaler found for field {} of {}".format(name, repr(context))
             )
             continue
         header_value, header_charset = decode_header(value)[0]

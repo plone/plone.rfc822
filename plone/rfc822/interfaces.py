@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from zope import schema
 from zope.interface import Attribute
 from zope.interface import Interface
@@ -113,8 +112,8 @@ class IFieldMarshaler(Interface):
     """
 
     ascii = schema.Bool(
-        title=u"ASCII only",
-        description=u"Set this to true if this marshaler is guaranteed "
+        title="ASCII only",
+        description="Set this to true if this marshaler is guaranteed "
         "to return ASCII characters only. This will allow "
         "a header to be rendered without an encoding wrapper",
         default=False,

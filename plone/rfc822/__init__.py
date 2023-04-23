@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from plone.rfc822._utils import constructMessage
 from plone.rfc822._utils import constructMessageFromSchema
 from plone.rfc822._utils import constructMessageFromSchemata

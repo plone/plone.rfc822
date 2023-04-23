@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Default field marshalers for the fields in zope.schema.
 
 Note that none of the marshalers will return a value for getContentType(),
@@ -52,7 +51,7 @@ _marker = object()
 
 
 @implementer(IFieldMarshaler)
-class BaseFieldMarshaler(object):
+class BaseFieldMarshaler:
     """Base class for field marshalers
     """
 
@@ -136,10 +135,10 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
     def encode(self, value, charset='utf-8', primary=False):
         if value is None:
             return
-        if isinstance(value, six.binary_type):
+        if isinstance(value, bytes):
             # value already encoded
             return value
-        return six.text_type(value).encode(charset)
+        return str(value).encode(charset)
 
     def decode(
         self,
@@ -149,7 +148,7 @@ class UnicodeFieldMarshaler(BaseFieldMarshaler):
         contentType=None,
         primary=False,
     ):
-        if isinstance(value, six.binary_type):
+        if isinstance(value, bytes):
             unicodeValue = value.decode(charset)
         else:
             unicodeValue = value
@@ -168,10 +167,10 @@ class UnicodeValueFieldMarshaler(UnicodeFieldMarshaler):
     """
 
     def encode(self, value, charset='utf-8', primary=False):
-        encoded = super(UnicodeValueFieldMarshaler, self).encode(
+        encoded = super().encode(
             value, charset, primary
         )
-        if not encoded or max(six.iterbytes(encoded)) < 128:
+        if not encoded or max(iter(encoded)) < 128:
             self.ascii = True
         else:
             self.ascii = False
@@ -231,7 +230,7 @@ class DatetimeMarshaler(BaseFieldMarshaler):
         contentType=None,
         primary=False,
     ):
-        if isinstance(value, six.binary_type):
+        if isinstance(value, bytes):
             value = value.decode(charset)
         try:
             return dateutil.parser.parse(value)
@@ -295,7 +294,7 @@ class TimedeltaMarshaler(BaseFieldMarshaler):
         primary=False,
     ):
         try:
-            days, seconds, microseconds = [int(v) for v in value.split(":")]
+            days, seconds, microseconds = (int(v) for v in value.split(":"))
             return datetime.timedelta(days, seconds, microseconds)
         except Exception as e:
             raise ValueError(e)
@@ -339,7 +338,7 @@ class CollectionMarshaler(BaseFieldMarshaler):
                 ascii = False
 
         self.ascii = ascii
-        if value_lines and isinstance(value_lines[0], six.binary_type):
+        if value_lines and isinstance(value_lines[0], bytes):
             return b'||'.join(value_lines)
         else:
             return '||'.join(value_lines)
@@ -361,7 +360,7 @@ class CollectionMarshaler(BaseFieldMarshaler):
             )
 
         listValue = []
-        if isinstance(value, six.binary_type):
+        if isinstance(value, bytes):
             lines = value.split(b'||')
         else:
             lines = value.split('||')

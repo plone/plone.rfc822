@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 try:
     from plone.supermodel.interfaces import IFieldMetadataHandler
     HAVE_SUPERMODEL = True
@@ -13,7 +12,7 @@ if HAVE_SUPERMODEL:
     from zope.interface import implementer
 
     @implementer(IFieldMetadataHandler)
-    class PrimaryFieldMetadataHandler(object):
+    class PrimaryFieldMetadataHandler:
         """Define the ``marshal`` namespace.
 
         This lets you write marshal:primary="true" on a field to mark it as

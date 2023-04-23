@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Implementation of IMessageAPI methods.
 
 import these from plone.rfc822 directly, not from this module.
@@ -26,9 +25,9 @@ def safe_native_string(value, encoding='utf8'):
     ''' Try to convert value into a native string
     '''
     if six.PY2:
-        if isinstance(value, six.text_type):
+        if isinstance(value, str):
             return value.encode(encoding)
-    elif isinstance(value, six.binary_type):
+    elif isinstance(value, bytes):
         return value.decode(encoding)
     if not isinstance(value, str):
         raise ValueError('Cannot convert %r into a native string' % value)
@@ -108,7 +107,7 @@ def constructMessage(context, fields, charset="utf-8"):
         marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
         if marshaler is None:
             logger.debug(
-                "No marshaler found for field {0} of {1}".format(
+                "No marshaler found for field {} of {}".format(
                     name, repr(context)
                 )
             )
@@ -117,7 +116,7 @@ def constructMessage(context, fields, charset="utf-8"):
             value = marshaler.marshal(charset, primary=False)
         except ValueError as e:
             logger.debug(
-                "Marshaling of {0} for {1} failed: {2}".format(
+                "Marshaling of {} for {} failed: {}".format(
                     name, repr(context), str(e)
                 )
             )
@@ -194,13 +193,13 @@ def initializeObject(context, fields, message, defaultCharset="utf-8"):
         name = name.lower()
         fieldset = header_fields.get(name, None)
         if fieldset is None or len(fieldset) == 0:
-            logger.debug("No matching field found for header {0}".format(name))
+            logger.debug(f"No matching field found for header {name}")
             continue
         field = fieldset.pop(0)
         marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
         if marshaler is None:
             logger.debug(
-                "No marshaler found for field {0} of {1}".format(
+                "No marshaler found for field {} of {}".format(
                     name, repr(context)
                 )
             )
@@ -214,7 +213,7 @@ def initializeObject(context, fields, message, defaultCharset="utf-8"):
         #
         # Also, replace escaped Newlines, for details see
         # https://tools.ietf.org/html/rfc2822#section-3.2.2
-        if isinstance(header_value, six.binary_type):
+        if isinstance(header_value, bytes):
             header_value = header_value.replace(b"\r\n", b"\n")
             header_value = header_value.replace(b"\\n", b"\n")
         else:
@@ -232,7 +231,7 @@ def initializeObject(context, fields, message, defaultCharset="utf-8"):
             # interface allows demarshal() to raise ValueError to indicate
             # marshalling failed
             logger.debug(
-                "Demarshalling of {0} for {1} failed: {2}".format(
+                "Demarshalling of {} for {} failed: {}".format(
                     name, repr(context), str(e)
                 )
             )
@@ -246,7 +245,7 @@ def initializeObject(context, fields, message, defaultCharset="utf-8"):
         return
 
     # A single payload is a string, multiparts are lists
-    if isinstance(payloads, six.string_types):
+    if isinstance(payloads, str):
         if len(primary) != 1:
             raise ValueError(
                 "Got a single string payload for message, but no primary "
@@ -290,7 +289,7 @@ def initializeObject(context, fields, message, defaultCharset="utf-8"):
             # interface allows demarshal() to raise ValueError to
             # indicate marshalling failed
             logger.debug(
-                "Demarshalling of {0} for {1} failed: {2}".format(
+                "Demarshalling of {} for {} failed: {}".format(
                     name, repr(context), str(e)
                 )
             )

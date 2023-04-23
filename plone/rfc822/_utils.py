@@ -15,7 +15,6 @@ from zope.deprecation import deprecate
 from zope.schema import getFieldsInOrder
 
 import logging
-import six
 
 
 logger = logging.getLogger("plone.rfc822")
@@ -23,10 +22,7 @@ logger = logging.getLogger("plone.rfc822")
 
 def safe_native_string(value, encoding="utf8"):
     """Try to convert value into a native string"""
-    if six.PY2:
-        if isinstance(value, str):
-            return value.encode(encoding)
-    elif isinstance(value, bytes):
+    if isinstance(value, bytes):
         return value.decode(encoding)
     if not isinstance(value, str):
         raise ValueError("Cannot convert %r into a native string" % value)

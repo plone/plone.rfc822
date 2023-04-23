@@ -3,8 +3,6 @@ from plone.testing import layered
 from plone.testing.zca import UNIT_TESTING
 
 import doctest
-import re
-import six
 import unittest
 
 
@@ -22,14 +20,6 @@ optionflags = (
 )
 
 
-class Py23DocChecker(doctest.OutputChecker):
-    def check_output(self, want, got, optionflags):
-        if six.PY2:
-            got = re.sub("u'(.*?)'", "'\\1'", got)
-        got = re.sub("b'(.*?)'", "'\\1'", got)
-        return doctest.OutputChecker.check_output(self, want, got, optionflags)
-
-
 class TestUtils(unittest.TestCase):
     def test_safe_native_string(self):
         self.assertIsInstance(safe_native_string(b""), str)
@@ -45,7 +35,6 @@ def test_suite():
                 doctest.DocFileSuite(
                     docfile,
                     optionflags=optionflags,
-                    checker=Py23DocChecker(),
                 ),
                 layer=UNIT_TESTING,
             )

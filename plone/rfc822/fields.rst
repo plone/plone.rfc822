@@ -63,7 +63,6 @@ This interface is implemented by a the following class::
     >>> from decimal import Decimal
     >>> from zope.interface import implementer
     >>> import datetime
-    >>> import six
     >>> @implementer(ITestContent)
     ... class TestContent(object):
     ...     _text = u"text\xd8"
@@ -80,7 +79,7 @@ This interface is implemented by a the following class::
     ...     _id = u'some.id'
     ...     _dottedName = 'dotted.name'
     ...     _bool = True
-    ...     _int = long(-10) if six.PY2 else -10
+    ...     _int = -10
     ...     _float = 0.3
     ...     _decimal = Decimal("5.0")
     ...     _choice1 = u"two"
@@ -295,10 +294,7 @@ An URI is in Python 2 based on unicode text, in Python 3 on bytes.
     'http://plone.org'
     >>> marshaler.getContentType() is None
     True
-    >>> if six.PY2:
-    ...     expected = None  # its IBytes based
-    ... else:
-    ...     expected = 'utf-8'
+    >>> expected = 'utf-8'
     >>> marshaler.getCharset('utf-8') == expected
     True
     >>> marshaler.ascii
@@ -316,10 +312,7 @@ Id
     'some.id'
     >>> marshaler.getContentType() is None
     True
-    >>> if six.PY2:
-    ...     expected = None  # its IBytes based
-    ... else:
-    ...     expected = 'utf-8'
+    >>> expected = 'utf-8'
     >>> marshaler.getCharset('utf-8') == expected
     True
     >>> marshaler.ascii
@@ -337,10 +330,7 @@ DottedName
     'dotted.name'
     >>> marshaler.getContentType() is None
     True
-    >>> if six.PY2:
-    ...     expected = None  # its IBytes based
-    ... else:
-    ...     expected = 'utf-8'
+    >>> expected = 'utf-8'
     >>> marshaler.getCharset('utf-8') == expected
     True
     >>> marshaler.ascii

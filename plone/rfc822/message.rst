@@ -23,7 +23,7 @@ annotations, which we will use later in this test::
 
 ::
 
-    >>> from six import StringIO
+    >>> from io import StringIO
     >>> from zope.configuration import xmlconfig
     >>> xmlconfig.xmlconfig(StringIO(configuration))
 
@@ -621,7 +621,6 @@ Technical both is fine.
 
 ::
 
-    >>> import six
     >>> content.description = "Test content\nwith newline difference"
     >>> msg = constructMessageFromSchema(content, ITestContent)
     >>> effective_output = msg.as_string()

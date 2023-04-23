@@ -116,7 +116,7 @@ Text
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_text']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'text\xc3\x98'
+    b'text\xc3\x98'
     >>> marshaler.decode(b'text\xc3\x98')
     'text\xd8'
     >>> marshaler.getContentType() is None
@@ -131,7 +131,7 @@ if the field value is within the ascii range::
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_text2']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'text'
+    b'text'
     >>> marshaler.decode(b'text\xc3\x98')
     'text\xd8'
     >>> marshaler.getContentType() is None
@@ -148,7 +148,7 @@ TextLine
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_textLine']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'textline\xc3\x98'
+    b'textline\xc3\x98'
     >>> marshaler.decode(b'textline\xc3\x98')
     'textline\xd8'
     >>> marshaler.getContentType() is None
@@ -165,7 +165,7 @@ if the field value is within the ascii range.
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_textLine2']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'textline'
+    b'textline'
     >>> marshaler.decode(b'textline\xc3\x98')
     'textline\xd8'
     >>> marshaler.getContentType() is None
@@ -182,7 +182,7 @@ Password
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_password']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'password\xc3\x98'
+    b'password\xc3\x98'
     >>> marshaler.decode(b'password\xc3\x98')
     'password\xd8'
     >>> marshaler.getContentType() is None
@@ -199,7 +199,7 @@ if the field value is within the ascii range.
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_password2']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'password'
+    b'password'
     >>> marshaler.decode(b'password\xc3\x98')
     'password\xd8'
     >>> marshaler.getContentType() is None
@@ -218,7 +218,7 @@ Bytes
     >>> marshaler.marshal()
     'bytes'
     >>> marshaler.decode(b'bytes')
-    'bytes'
+    b'bytes'
     >>> marshaler.getContentType() is None
     True
     >>> marshaler.getCharset('utf-8') is None
@@ -235,7 +235,7 @@ BytesLine
     >>> marshaler.marshal()
     'bytesline'
     >>> marshaler.decode(b'bytesline')
-    'bytesline'
+    b'bytesline'
     >>> marshaler.getContentType() is None
     True
     >>> marshaler.getCharset('utf-8') is None
@@ -253,7 +253,7 @@ Note: There is a BytesField which stores b'foo' binary string.
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_ascii']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'ascii'
+    b'ascii'
     >>> marshaler.decode(b'ascii')
     'ascii'
     >>> marshaler.getContentType() is None
@@ -270,7 +270,7 @@ ASCIILine
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_asciiLine']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'asciiline'
+    b'asciiline'
     >>> marshaler.decode(b'asciiline')
     'asciiline'
     >>> marshaler.getContentType() is None
@@ -289,7 +289,7 @@ An URI is in Python 2 based on unicode text, in Python 3 on bytes.
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_uri']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'http://plone.org'
+    b'http://plone.org'
     >>> marshaler.decode(b'http://plone.org')
     'http://plone.org'
     >>> marshaler.getContentType() is None
@@ -307,7 +307,7 @@ Id
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_id']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'some.id'
+    b'some.id'
     >>> marshaler.decode(b'some.id')
     'some.id'
     >>> marshaler.getContentType() is None
@@ -325,7 +325,7 @@ DottedName
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_dottedName']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'dotted.name'
+    b'dotted.name'
     >>> marshaler.decode(b'dotted.name')
     'dotted.name'
     >>> marshaler.getContentType() is None
@@ -343,10 +343,10 @@ Bool
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_bool']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'True'
+    b'True'
     >>> t._bool = False
     >>> marshaler.marshal()
-    'False'
+    b'False'
     >>> t._bool = True
     >>> marshaler.decode(b'True')
     True
@@ -366,7 +366,7 @@ Int
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_int']), IFieldMarshaler)
     >>> marshaler.marshal()
-    '-10'
+    b'-10'
     >>> marshaler.decode(b'-10')
     -10
     >>> marshaler.getContentType() is None
@@ -383,7 +383,7 @@ Float
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_float']), IFieldMarshaler)
     >>> marshaler.marshal()
-    '0.3'
+    b'0.3'
     >>> marshaler.decode(b'0.25')
     0.25
     >>> marshaler.getContentType() is None
@@ -400,7 +400,7 @@ Decimal
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_decimal']), IFieldMarshaler)
     >>> marshaler.marshal()
-    '5.0'
+    b'5.0'
     >>> marshaler.decode(b'5.0')
     Decimal('5.0')
     >>> marshaler.getContentType() is None
@@ -417,7 +417,7 @@ Choice
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_choice1']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'two'
+    b'two'
     >>> marshaler.decode(b'one')
     'one'
     >>> marshaler.getContentType() is None
@@ -429,7 +429,7 @@ Choice
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_choice2']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'two'
+    b'two'
     >>> marshaler.decode(b'three')
     'three'
     >>> marshaler.getContentType() is None
@@ -497,7 +497,7 @@ Tuple
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_tuple']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'one\xc3\x98||two'
+    b'one\xc3\x98||two'
     >>> marshaler.decode(b'one\xc3\x98||two')
     ('one\xd8', 'two')
     >>> marshaler.getContentType() is None
@@ -514,7 +514,7 @@ List
 
     >>> marshaler = getMultiAdapter((t, ITestContent['_list']), IFieldMarshaler)
     >>> marshaler.marshal()
-    'three||four'
+    b'three||four'
     >>> marshaler.decode(b'three||four')
     ['three', 'four']
     >>> marshaler.getContentType() is None

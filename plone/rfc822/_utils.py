@@ -105,16 +105,12 @@ def constructMessage(context, fields, charset="utf-8"):
             continue
         marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
         if marshaler is None:
-            logger.debug(
-                f"No marshaler found for field {name} of {repr(context)}"
-            )
+            logger.debug(f"No marshaler found for field {name} of {repr(context)}")
             continue
         try:
             value = marshaler.marshal(charset, primary=False)
         except ValueError as e:
-            logger.debug(
-                f"Marshaling of {name} for {repr(context)} failed: {str(e)}"
-            )
+            logger.debug(f"Marshaling of {name} for {repr(context)} failed: {str(e)}")
             continue
         if value is None:
             value = ""
@@ -185,9 +181,7 @@ def initializeObject(context, fields, message, defaultCharset="utf-8"):
         field = fieldset.pop(0)
         marshaler = queryMultiAdapter((context, field), IFieldMarshaler)
         if marshaler is None:
-            logger.debug(
-                f"No marshaler found for field {name} of {repr(context)}"
-            )
+            logger.debug(f"No marshaler found for field {name} of {repr(context)}")
             continue
         header_value, header_charset = decode_header(value)[0]
         if header_charset is None:

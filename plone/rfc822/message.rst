@@ -147,7 +147,7 @@ register it using the ``zope.component`` API.
 
 Hint: If the schema contained multiple text fields, this adapter would apply
 to all of them. To avoid that, we could either mark the field with a custom
-marker interface (similary to the way we marked a field with ``IPrimaryField``
+marker interface (similarly to the way we marked a field with ``IPrimaryField``
 above), or have the marshaler check the field name.
 
 Let's now try again:

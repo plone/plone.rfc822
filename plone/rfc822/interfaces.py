@@ -185,7 +185,7 @@ class IFieldMarshaler(Interface):
         May return None if a content type does not make sense.
         """
 
-    def getCharset(defualt="utf-8"):
+    def getCharset(default="utf-8"):
         """Return the charset of the field. The value should be appropriate
         for the 'charset' parameter to the Content-Type HTTP header. This is
         mainly used for marshalling

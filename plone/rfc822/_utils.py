@@ -11,7 +11,6 @@ from email.message import Message
 from plone.rfc822.interfaces import IFieldMarshaler
 from plone.rfc822.interfaces import IPrimaryField
 from zope.component import queryMultiAdapter
-from zope.deprecation import deprecate
 from zope.schema import getFieldsInOrder
 
 import logging
@@ -124,12 +123,6 @@ def constructMessage(context, fields, charset="utf-8"):
     _add_payload_to_message(context, msg, primaries, charset)
 
     return msg
-
-
-@deprecate("Use 'message.as_string()' from 'email.message.Message' class instead.")
-def renderMessage(message, mangleFromHeader=False):
-    # to be removed in a 3.x series
-    return message.as_string(mangleFromHeader)
 
 
 def initializeObjectFromSchema(context, schema, message, defaultCharset="utf-8"):

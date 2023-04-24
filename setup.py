@@ -56,7 +56,6 @@ setup(
         "python-dateutil",
         "setuptools",
         "zope.component",
-        "zope.deprecation",
         "zope.interface",
         "zope.schema",
     ],

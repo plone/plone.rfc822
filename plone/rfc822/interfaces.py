@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
 from zope import schema
 from zope.interface import Attribute
 from zope.interface import Interface
 
 
 class IPrimaryField(Interface):
-    """Marker interface for the primary field in a schema
-    """
+    """Marker interface for the primary field in a schema"""
 
 
 class IPrimaryFieldInfo(Interface):
@@ -14,6 +12,7 @@ class IPrimaryFieldInfo(Interface):
 
     Content type frameworks should register an adapter to this interface.
     """
+
     fieldname = Attribute("Field name")
     field = Attribute("Field")
     value = Attribute("Field value")
@@ -22,23 +21,23 @@ class IPrimaryFieldInfo(Interface):
 class IMessageAPI(Interface):
     """Functions provided by this module
 
-    These can all be imported as::
+    These can all be imported as:
 
-        >>> from plone.rfc822 import constructMessage
+    from plone.rfc822 import constructMessage
     """
 
-    def constructMessageFromSchema(context, schema, charset='utf-8'):
+    def constructMessageFromSchema(context, schema, charset="utf-8"):
         """Convenience method which calls ``constructMessage()`` with all the
         fields, in order, of the given schema interface
         """
 
-    def constructMessageFromSchemata(context, schemata, charset='utf-8'):
+    def constructMessageFromSchemata(context, schemata, charset="utf-8"):
         """Convenience method which calls ``constructMessage()`` with all the
         fields, in order, of all the given schemata (a sequence of schema
         interfaces).
         """
 
-    def constructMessage(context, fields, charset='utf-8'):
+    def constructMessage(context, fields, charset="utf-8"):
         """Helper method to construct a message.
 
         ``context`` is a content object.
@@ -65,28 +64,20 @@ class IMessageAPI(Interface):
         DEPRECATED. Use 'message.as_string()' instead.
         """
 
-    def initializeObjectFromSchema(
-        context,
-        schema,
-        message,
-        defaultCharset='utf-8'
-    ):
+    def initializeObjectFromSchema(context, schema, message, defaultCharset="utf-8"):
         """Convenience method which calls ``initializeObject()`` with all the
         fields, in order, of the given schema interface
         """
 
     def initializeObjectFromSchemata(
-        context,
-        schemata,
-        message,
-        defaultCharset='utf-8'
+        context, schemata, message, defaultCharset="utf-8"
     ):
         """Convenience method which calls ``initializeObject()`` with all the
         fields in order, of all the given schemata (a sequence of schema
         interfaces).
         """
 
-    def initializeObject(context, fields, message, defaultCharset='utf-8'):
+    def initializeObject(context, fields, message, defaultCharset="utf-8"):
         """Initialise an object from a message.
 
         ``context`` is the content object to initialise.
@@ -113,15 +104,15 @@ class IFieldMarshaler(Interface):
     """
 
     ascii = schema.Bool(
-        title=u"ASCII only",
-        description=u"Set this to true if this marshaler is guaranteed "
+        title="ASCII only",
+        description="Set this to true if this marshaler is guaranteed "
         "to return ASCII characters only. This will allow "
         "a header to be rendered without an encoding wrapper",
         default=False,
         required=True,
     )
 
-    def marshal(charset='utf-8', primary=False):
+    def marshal(charset="utf-8", primary=False):
         """Return the value of the adapted field on the adapted context.
 
         Note: It may be necessary to adapt the context to the field's
@@ -142,11 +133,7 @@ class IFieldMarshaler(Interface):
         """
 
     def demarshal(
-        value,
-        message=None,
-        charset='utf-8',
-        contentType=None,
-        primary=False
+        value, message=None, charset="utf-8", contentType=None, primary=False
     ):
         """Update the value of the adapted field on the adapted context.
 
@@ -171,7 +158,7 @@ class IFieldMarshaler(Interface):
         Raise ``ValueError`` if the demarshalling cannot be completed.
         """
 
-    def encode(value, charset='utf-8', primary=False):
+    def encode(value, charset="utf-8", primary=False):
         """Like marshal(), but acts on the passed-in ``value`` instead of
         reading it from the field.
 
@@ -181,13 +168,7 @@ class IFieldMarshaler(Interface):
         Return None if the value cannot be encoded.
         """
 
-    def decode(
-        value,
-        message=None,
-        charset='utf-8',
-        contentType=None,
-        primary=False
-    ):
+    def decode(value, message=None, charset="utf-8", contentType=None, primary=False):
         """Like demarshal, but return the value instead of updating the field.
 
         This is only used for collection fields and other situations where
@@ -204,7 +185,7 @@ class IFieldMarshaler(Interface):
         May return None if a content type does not make sense.
         """
 
-    def getCharset(defualt='utf-8'):
+    def getCharset(default="utf-8"):
         """Return the charset of the field. The value should be appropriate
         for the 'charset' parameter to the Content-Type HTTP header. This is
         mainly used for marshalling

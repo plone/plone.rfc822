@@ -23,7 +23,7 @@ annotations, which we will use later in this test::
 
 ::
 
-    >>> from six import StringIO
+    >>> from io import StringIO
     >>> from zope.configuration import xmlconfig
     >>> xmlconfig.xmlconfig(StringIO(configuration))
 
@@ -147,7 +147,7 @@ register it using the ``zope.component`` API.
 
 Hint: If the schema contained multiple text fields, this adapter would apply
 to all of them. To avoid that, we could either mark the field with a custom
-marker interface (similary to the way we marked a field with ``IPrimaryField``
+marker interface (similarly to the way we marked a field with ``IPrimaryField``
 above), or have the marshaler check the field name.
 
 Let's now try again:
@@ -554,7 +554,7 @@ We can also reconstruct the object from this message.
     >>> initializeObjectFromSchema(newFileContent, IFileContent, inputMessage)
 
     >>> newFileContent.file1.data
-    'dummy file'
+    b'dummy file'
     >>> newFileContent.file1.contentType
     'text/plain'
     >>> newFileContent.file1.filename
@@ -596,14 +596,14 @@ And again, we can reconstruct the object, this time with both fields:
     >>> initializeObjectFromSchema(newFileContent, IFileContent, inputMessage)
 
     >>> newFileContent.file1.data
-    'dummy file'
+    b'dummy file'
     >>> newFileContent.file1.contentType
     'text/plain'
     >>> newFileContent.file1.filename
     'dummy1.txt'
 
     >>> newFileContent.file2.data
-    '<html><body>test</body></html>'
+    b'<html><body>test</body></html>'
     >>> newFileContent.file2.contentType
     'text/html'
     >>> newFileContent.file2.filename
@@ -621,7 +621,6 @@ Technical both is fine.
 
 ::
 
-    >>> import six
     >>> content.description = "Test content\nwith newline difference"
     >>> msg = constructMessageFromSchema(content, ITestContent)
     >>> effective_output = msg.as_string()

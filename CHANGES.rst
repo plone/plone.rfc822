@@ -8,6 +8,25 @@ Changelog
 
 .. towncrier release notes start
 
+3.0.0 (2023-04-26)
+------------------
+
+Breaking changes:
+
+
+- Remove long deprecated `renderMessage` function.
+  [@jensens] (1-1)
+- Drop python 2.7 compatibility.
+  [gforcada] (#1)
+
+
+Internal:
+
+
+- Update configuration files.
+  [plone devs] (a864b30f)
+
+
 2.0.2 (2020-04-22)
 ------------------
 

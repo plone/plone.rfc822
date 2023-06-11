@@ -1,5 +1,15 @@
 # Generated from:
 # https://github.com/plone/meta/tree/master/config/default
+# See the inline comments on how to expand/tweak this configuration file
 [meta]
 template = "default"
-commit-id = "a864b30f"
+commit-id = "237ff4c8"
+
+[flake8]
+extra_lines = """
+per-file-ignores =
+    plone/rfc822/__init__.py:F401
+"""
+
+[pyproject]
+dependencies_ignores = "['plone.supermodel']"

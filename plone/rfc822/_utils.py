@@ -4,6 +4,7 @@ import these from plone.rfc822 directly, not from this module.
 
 See interfaces.py for details.
 """
+
 from email.encoders import encode_base64
 from email.header import decode_header
 from email.header import Header

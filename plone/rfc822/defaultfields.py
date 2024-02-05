@@ -30,6 +30,7 @@ Unsupported by default:
 * InterfaceField - stores Interface
 * Dict - stores a dict
 """
+
 from plone.rfc822.interfaces import IFieldMarshaler
 from zope.component import adapter
 from zope.component import queryMultiAdapter

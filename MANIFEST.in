@@ -1,7 +1,7 @@
 include *.rst
 include pyproject.toml
 
-graft plone
+graft src
 graft docs
 
 global-exclude *.pyc

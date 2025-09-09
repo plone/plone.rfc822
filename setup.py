@@ -1,22 +1,22 @@
+from pathlib import Path
 from setuptools import find_packages
 from setuptools import setup
 
-import os
-
 
 version = "3.0.2.dev0"
+
+long_description = (
+    f"{Path('README.rst').read_text()}\n"
+    f"{Path('CHANGES.rst').read_text()}\n"
+    f"{(Path('src') / 'plone' / 'rfc822' / 'message.rst').read_text()}"
+)
 
 setup(
     name="plone.rfc822",
     version=version,
     description="RFC822 marshalling for zope.schema fields",
-    long_description=(
-        open("README.rst").read()
-        + "\n"
-        + open("CHANGES.rst").read()
-        + "\n"
-        + open(os.path.join("plone", "rfc822", "message.rst")).read()
-    ),
+    long_description=long_description,
+    long_description_content_type="text/x-rst",
     # Get more strings from
     # https://pypi.org/classifiers/
     classifiers=[
@@ -37,8 +37,9 @@ setup(
     author_email="optilude@gmail.com",
     url="https://pypi.org/project/plone.rfc822",
     license="BSD",
-    packages=find_packages(),
+    packages=find_packages("src"),
     namespace_packages=["plone"],
+    package_dir={"": "src"},
     include_package_data=True,
     zip_safe=False,
     python_requires=">=3.8",

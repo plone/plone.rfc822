@@ -49,7 +49,6 @@ setup(
     },
     install_requires=[
         "python-dateutil",
-        "setuptools",
         "zope.component",
         "zope.interface",
         "zope.schema",

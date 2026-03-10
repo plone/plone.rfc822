@@ -16,7 +16,6 @@ from zope.schema import getFieldsInOrder
 
 import logging
 
-
 logger = logging.getLogger("plone.rfc822")
 
 

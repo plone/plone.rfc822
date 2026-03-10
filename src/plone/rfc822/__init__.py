@@ -8,5 +8,4 @@ from plone.rfc822.interfaces import IMessageAPI
 
 import zope.interface
 
-
 zope.interface.moduleProvides(IMessageAPI)

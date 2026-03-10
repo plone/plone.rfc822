@@ -5,7 +5,6 @@ from plone.testing.zca import UNIT_TESTING
 import doctest
 import unittest
 
-
 DOCFILES = [
     "message.rst",
     "fields.rst",

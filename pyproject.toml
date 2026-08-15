@@ -4,7 +4,62 @@
 [build-system]
 requires = ["setuptools>=68.2,<83", "wheel"]
 
+# START-MARKER-MANUAL-CONFIG
+# Anything from here until END-MARKER-MANUAL-CONFIG
+# will be kept by plone.meta
 
+[project]
+name = "plone.rfc822"
+version = "4.0.1.dev0"
+description = "RFC822 marshalling for zope.schema fields"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Framework :: Plone",
+    "Framework :: Plone :: 6.2",
+    "Framework :: Plone :: Core",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+license = "BSD-3-Clause"
+dynamic = ["readme"]
+requires-python = ">=3.10"
+authors = [
+    {name = "Martin Aspeli and contributors",email = "optilude@gmail.com"},
+]
+maintainers = [
+    {name = "Plone Foundation and contributors",email = "plone-developers@lists.sourceforge.net"},
+]
+dependencies = [
+    "python-dateutil",
+    "zope.component",
+    "zope.interface",
+    "zope.schema",
+]
+keywords = ["zope", "schema", "rfc822"]
+
+[project.optional-dependencies]
+supermodel = ["plone.supermodel"]
+test = [
+    "persistent",
+    "plone.supermodel",
+    "plone.testing",
+    "zope.annotation",
+    "zope.configuration",
+]
+
+[project.urls]
+Source = "https://github.com/plone/plone.rfc822"
+Issues = "https://github.com/plone/Products.CMFPlone/issues"
+Changelog = "https://github.com/plone/plone.rfc822/blob/master/CHANGES.rst"
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.rst", "src/plone/rfc822/message.rst", "CHANGES.rst"]}
+# END-MARKER-MANUAL-CONFIG
 
 [tool.towncrier]
 directory = "news/"

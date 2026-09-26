@@ -249,7 +249,10 @@ class DateMarshaler(BaseFieldMarshaler):
         contentType=None,
         primary=False,
     ):
-        unicodeValue = value.decode(charset)
+        if isinstance(value, bytes):
+            unicodeValue = value.decode(charset)
+        else:
+            unicodeValue = value
         try:
             return dateutil.parser.parse(unicodeValue).date()
         except Exception as e:

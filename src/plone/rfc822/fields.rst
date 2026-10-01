@@ -473,6 +473,14 @@ Date
     >>> marshaler.ascii
     True
 
+``email.header.decode_header()`` returns plain native strings, not bytes,
+for headers that don't need any special encoding, so ``decode()`` also has
+to accept a native string here, the same way ``DatetimeMarshaler`` already
+does::
+
+    >>> marshaler.decode('2008-02-03')
+    datetime.date(2008, 2, 3)
+
 Timedelta
 ---------
 

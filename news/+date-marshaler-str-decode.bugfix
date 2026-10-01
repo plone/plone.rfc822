@@ -1,0 +1,5 @@
+Fix ``DateMarshaler.decode`` raising an unhandled ``AttributeError`` instead
+of gracefully failing when the incoming header value is already a native
+string rather than bytes, which is what ``email.header.decode_header``
+returns for plain ASCII date headers.
+[afonsojanu]
